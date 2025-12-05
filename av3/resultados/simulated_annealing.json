@@ -1,0 +1,22 @@
+{
+  "single_run": {
+    "board": [
+      5,
+      0,
+      2,
+      6,
+      6,
+      3,
+      7,
+      4
+    ],
+    "score": 27.0,
+    "iterations": 5000
+  },
+  "all_solutions": null,
+  "config": {
+    "temp0": 5.0,
+    "cooling": 0.995,
+    "max_iter": 5000
+  }
+}
