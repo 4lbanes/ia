@@ -53,6 +53,12 @@ def main() -> None:
     parser.add_argument("--sa-temp0", type=float, default=5.0, help="Temperatura inicial (SA 8-rainhas).")
     parser.add_argument("--sa-cooling", type=float, default=0.995, help="Fator de resfriamento (SA 8-rainhas).")
     parser.add_argument("--sa-max-iter", type=int, default=5000, help="Máximo de iterações (SA 8-rainhas).")
+    parser.add_argument(
+        "--sa-max-runs",
+        type=int,
+        default=2000,
+        help="Máximo de execuções para buscar as 92 soluções (SA 8-rainhas).",
+    )
     parser.add_argument("--sa-find-all", dest="sa_find_all", action="store_true", help="Busca pelas 92 soluções com SA.")
     parser.add_argument(
         "--sa-skip-find-all",
@@ -92,6 +98,7 @@ def main() -> None:
             cooling=args.sa_cooling,
             max_iter=args.sa_max_iter,
             find_all=args.sa_find_all,
+            find_all_max_runs=args.sa_max_runs,
         )
         print("Resultados da Têmpera Simulada salvos em", output_root / "simulated_annealing.json")
         print(_safe_json(sa_results))

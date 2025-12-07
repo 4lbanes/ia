@@ -43,14 +43,13 @@ class SimulatedAnnealing:
     @staticmethod
     def _neighbor(board: np.ndarray, rng: np.random.Generator) -> np.ndarray:
         candidate = board.copy()
-        col = rng.integers(0, BOARD_SIZE)
-        delta = rng.choice([-1, 1])
-        candidate[col] = (candidate[col] + delta) % BOARD_SIZE
+        c1, c2 = rng.choice(BOARD_SIZE, size=2, replace=False)
+        candidate[c1], candidate[c2] = candidate[c2], candidate[c1]
         return candidate
 
     def run(self, seed: int | None = None, target: float = MAX_PAIRS) -> SARunResult:
         rng = np.random.default_rng(seed)
-        board = rng.integers(0, BOARD_SIZE, size=BOARD_SIZE)
+        board = rng.permutation(BOARD_SIZE)
         current_score = fitness(board)
         best_board = board.copy()
         best_score = current_score
@@ -82,7 +81,7 @@ class SimulatedAnnealing:
 def find_all_solutions(
     solver: SimulatedAnnealing,
     seed: int | None = None,
-    max_runs: int = 400,
+    max_runs: int = 2000,
     target_count: int = 92,
 ) -> Dict[str, object]:
     rng = np.random.default_rng(seed)
@@ -109,15 +108,16 @@ def find_all_solutions(
 def solve_and_save(
     output_dir: str | Path = "av3/resultados",
     seed: int | None = None,
-    temp0: float = 5.0,
-    cooling: float = 0.995,
-    max_iter: int = 5000,
+    temp0: float = 10.0,
+    cooling: float = 0.997,
+    max_iter: int = 20000,
     find_all: bool = True,
+    find_all_max_runs: int = 2000,
 ) -> Dict[str, object]:
     Path(output_dir).mkdir(parents=True, exist_ok=True)
     solver = SimulatedAnnealing(temp0=temp0, cooling=cooling, max_iter=max_iter)
     best = solver.run(seed=seed)
-    all_found = find_all_solutions(solver, seed=seed) if find_all else None
+    all_found = find_all_solutions(solver, seed=seed, max_runs=find_all_max_runs) if find_all else None
     payload = {
         "single_run": {
             "board": best.board,
