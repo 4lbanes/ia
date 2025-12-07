@@ -11,6 +11,15 @@ import numpy as np
 
 PointCloud = np.ndarray
 Route = List[int]
+DEFAULT_CSV_PATH = Path(__file__).resolve().parent.parent / "data" / "CaixeiroGruposGA.csv"
+
+
+def _to_serializable(obj):  # type: ignore[return-type]
+    if isinstance(obj, np.ndarray):
+        return obj.tolist()
+    if isinstance(obj, np.generic):
+        return obj.item()
+    raise TypeError(f"Object of type {obj.__class__.__name__} is not JSON serializable")
 
 
 @dataclass
@@ -41,15 +50,28 @@ def generate_points(points_per_region: int, rng: np.random.Generator) -> PointCl
     return np.vstack(cloud)
 
 
-def load_points(path: str | None, points_per_region: int, rng: np.random.Generator) -> PointCloud:
+def _load_csv_points(csv_path: Path) -> PointCloud | None:
+    if csv_path.exists():
+        data = np.genfromtxt(csv_path, delimiter=",", names=True, dtype=float)
+        if data.dtype.names:
+            data = np.column_stack([data[name] for name in data.dtype.names])
+        if data.ndim == 2 and data.shape[1] >= 3:
+            return data[:, :3]
+    return None
+
+
+def load_points(path: str | Path | None, points_per_region: int, rng: np.random.Generator) -> PointCloud:
+    candidates = []
     if path:
-        csv_path = Path(path)
-        if csv_path.exists():
-            data = np.genfromtxt(csv_path, delimiter=",", names=True, dtype=float)
-            if data.dtype.names:
-                data = np.column_stack([data[name] for name in data.dtype.names])
-            if data.ndim == 2 and data.shape[1] >= 3:
-                return data[:, :3]
+        candidates.append(Path(path))
+    else:
+        candidates.append(DEFAULT_CSV_PATH)
+        candidates.append(DEFAULT_CSV_PATH.with_name("CaixeiroGrupos.csv"))
+
+    for csv_path in candidates:
+        data = _load_csv_points(csv_path)
+        if data is not None:
+            return data
     return generate_points(points_per_region, rng)
 
 
@@ -128,16 +150,16 @@ def run_ga(
             best_route = population[best_idx].copy()
         history.append(best_length)
         if acceptable_generation is None and best_length <= target_length:
-            acceptable_generation = gen
+            acceptable_generation = int(gen)
         if acceptable_generation is not None and gen > acceptable_generation + 50:
             break
 
     return {
-        "best_route": best_route,
-        "best_length": best_length,
-        "history": history,
-        "acceptable_generation": acceptable_generation,
-        "target_length": target_length,
+        "best_route": [int(g) for g in best_route],
+        "best_length": float(best_length),
+        "history": [float(v) for v in history],
+        "acceptable_generation": acceptable_generation if acceptable_generation is None else int(acceptable_generation),
+        "target_length": float(target_length),
     }
 
 
@@ -181,7 +203,7 @@ def multiple_runs(
 
 
 def solve_and_save(
-    csv_path: str | None = None,
+    csv_path: str | Path | None = DEFAULT_CSV_PATH,
     output_dir: str | Path = "av3/resultados",
     seed: int | None = None,
     points_per_region: int = 40,
@@ -194,10 +216,10 @@ def solve_and_save(
     payload = {"config": config.__dict__, "points": points.tolist(), "summary": summary}
     out_path = Path(output_dir) / "genetic_tsp.json"
     with out_path.open("w", encoding="utf-8") as f:
-        json.dump(payload, f, indent=2, ensure_ascii=False)
+        json.dump(payload, f, indent=2, ensure_ascii=False, default=_to_serializable)
     return payload
 
 
 if __name__ == "__main__":
     data = solve_and_save()
-    print(json.dumps(data, indent=2, ensure_ascii=False))
+    print(json.dumps(data, indent=2, ensure_ascii=False, default=_to_serializable))

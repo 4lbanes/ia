@@ -5,10 +5,12 @@ import json
 from pathlib import Path
 from typing import List
 
+import numpy as np
+
 try:
     # Execução como módulo: python -m av3.run_experiments
     from .continuous import run_continuous_experiments
-    from .genetic_tsp import solve_and_save as solve_tsp
+    from .genetic_tsp import DEFAULT_CSV_PATH, solve_and_save as solve_tsp
     from .simulated_annealing import solve_and_save as solve_sa
 except ImportError:
     # Execução direta: python av3/run_experiments.py
@@ -16,9 +18,9 @@ except ImportError:
     import pathlib
 
     sys.path.append(str(pathlib.Path(__file__).resolve().parent.parent))
-    from av3.continuous import run_continuous_experiments
-    from av3.genetic_tsp import solve_and_save as solve_tsp
-    from av3.simulated_annealing import solve_and_save as solve_sa
+    from av3.src.continuous import run_continuous_experiments
+    from av3.src.genetic_tsp import DEFAULT_CSV_PATH, solve_and_save as solve_tsp
+    from av3.src.simulated_annealing import solve_and_save as solve_sa
 
 
 def parse_sections(raw: List[str] | None) -> List[str]:
@@ -27,6 +29,17 @@ def parse_sections(raw: List[str] | None) -> List[str]:
     if "all" in raw:
         return ["continuous", "sa", "ga"]
     return raw
+
+
+def _safe_json(data: object) -> str:
+    def _default(obj):  # type: ignore[return-type]
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        if isinstance(obj, np.generic):
+            return obj.item()
+        raise TypeError(f"Object of type {obj.__class__.__name__} is not JSON serializable")
+
+    return json.dumps(data, indent=2, ensure_ascii=False, default=_default)
 
 
 def main() -> None:
@@ -40,8 +53,19 @@ def main() -> None:
     parser.add_argument("--sa-temp0", type=float, default=5.0, help="Temperatura inicial (SA 8-rainhas).")
     parser.add_argument("--sa-cooling", type=float, default=0.995, help="Fator de resfriamento (SA 8-rainhas).")
     parser.add_argument("--sa-max-iter", type=int, default=5000, help="Máximo de iterações (SA 8-rainhas).")
-    parser.add_argument("--sa-find-all", action="store_true", help="Busca pelas 92 soluções com SA.")
-    parser.add_argument("--tsp-csv", default=None, help="Caminho para CaixeiroGrupos.csv (opcional).")
+    parser.add_argument("--sa-find-all", dest="sa_find_all", action="store_true", help="Busca pelas 92 soluções com SA.")
+    parser.add_argument(
+        "--sa-skip-find-all",
+        dest="sa_find_all",
+        action="store_false",
+        help="Pula a busca das 92 soluções (não recomendável, apenas para execuções rápidas).",
+    )
+    parser.set_defaults(sa_find_all=True)
+    parser.add_argument(
+        "--tsp-csv",
+        default=str(DEFAULT_CSV_PATH),
+        help="Caminho para CaixeiroGruposGA.csv (padrão: arquivo em av3/data).",
+    )
     parser.add_argument("--tsp-points-per-region", type=int, default=40, help="Quantidade de pontos por região gerada.")
     args = parser.parse_args()
 
@@ -58,7 +82,7 @@ def main() -> None:
             output_dir=output_root,
         )
         print("Resultados de funções contínuas salvos em", output_root / "continuous_results.json")
-        print(json.dumps(cont_results, indent=2, ensure_ascii=False))
+        print(_safe_json(cont_results))
 
     if "sa" in sections:
         sa_results = solve_sa(
@@ -70,7 +94,7 @@ def main() -> None:
             find_all=args.sa_find_all,
         )
         print("Resultados da Têmpera Simulada salvos em", output_root / "simulated_annealing.json")
-        print(json.dumps(sa_results, indent=2, ensure_ascii=False))
+        print(_safe_json(sa_results))
 
     if "ga" in sections:
         tsp_results = solve_tsp(
@@ -80,7 +104,7 @@ def main() -> None:
             points_per_region=args.tsp_points_per_region,
         )
         print("Resultados do GA (TSP 3D) salvos em", output_root / "genetic_tsp.json")
-        print(json.dumps(tsp_results, indent=2, ensure_ascii=False))
+        print(_safe_json(tsp_results))
 
 
 if __name__ == "__main__":
