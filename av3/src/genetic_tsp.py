@@ -30,7 +30,7 @@ class GAConfig:
     crossover_rate: float = 0.9
     mutation_rate: float = 0.01
     elitism: int = 2
-    target_improvement: float = 0.2  # 20% melhor que o ponto de partida
+    acceptable_epsilon: float = 0.05  # tolerância relativa (ε) para definir solução aceitável
 
 
 def generate_points(points_per_region: int, rng: np.random.Generator) -> PointCloud:
@@ -122,10 +122,16 @@ def run_ga(
     best_idx = int(np.argmin(lengths))
     best_length = lengths[best_idx]
     best_route = population[best_idx].copy()
+    # Regra de solução aceitável conforme slide: se |f(x*) - ε| foi atingido.
+    # Se o ótimo (target_length) é desconhecido, usamos o melhor inicial como referência
+    # e exigimos uma melhoria relativa de (1 - ε).
     if target_length is None:
-        target_length = best_length * (1.0 - config.target_improvement)
+        target_length = best_length * (1.0 - config.acceptable_epsilon)
+        acceptable_threshold = target_length
+    else:
+        acceptable_threshold = target_length * (1.0 + config.acceptable_epsilon)
 
-    acceptable_generation = 0 if best_length <= target_length else None
+    acceptable_generation = 0 if best_length <= acceptable_threshold else None
     history: List[float] = [best_length]
 
     for gen in range(1, config.generations + 1):
@@ -149,7 +155,7 @@ def run_ga(
             best_length = lengths[best_idx]
             best_route = population[best_idx].copy()
         history.append(best_length)
-        if acceptable_generation is None and best_length <= target_length:
+        if acceptable_generation is None and best_length <= acceptable_threshold:
             acceptable_generation = int(gen)
         if acceptable_generation is not None and gen > acceptable_generation + 50:
             break
@@ -160,6 +166,7 @@ def run_ga(
         "history": [float(v) for v in history],
         "acceptable_generation": acceptable_generation if acceptable_generation is None else int(acceptable_generation),
         "target_length": float(target_length),
+        "acceptable_threshold": float(acceptable_threshold),
     }
 
 
@@ -177,7 +184,12 @@ def multiple_runs(
     histories: List[List[float]] = []
 
     for _ in range(runs):
-        res = run_ga(points, config, seed=int(rng.integers(0, 2**32 - 1)), target_length=target_length)
+        res = run_ga(
+            points,
+            config,
+            seed=int(rng.integers(0, 2**32 - 1)),
+            target_length=target_length,
+        )
         histories.append(res["history"])  # type: ignore[index]
         if res["acceptable_generation"] is not None:
             generations.append(int(res["acceptable_generation"]))
@@ -207,12 +219,14 @@ def solve_and_save(
     output_dir: str | Path = "av3/resultados",
     seed: int | None = None,
     points_per_region: int = 40,
+    acceptable_epsilon: float = 0.05,
+    target_length: float | None = None,
 ) -> Dict[str, object]:
     Path(output_dir).mkdir(parents=True, exist_ok=True)
     rng = np.random.default_rng(seed)
     points = load_points(csv_path, points_per_region, rng)
-    config = GAConfig()
-    summary = multiple_runs(points, config=config, runs=8, seed=seed)
+    config = GAConfig(acceptable_epsilon=acceptable_epsilon)
+    summary = multiple_runs(points, config=config, runs=8, seed=seed, target_length=target_length)
     payload = {"config": config.__dict__, "points": points.tolist(), "summary": summary}
     out_path = Path(output_dir) / "genetic_tsp.json"
     with out_path.open("w", encoding="utf-8") as f:

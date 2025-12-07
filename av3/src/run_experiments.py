@@ -72,6 +72,18 @@ def main() -> None:
         default=str(DEFAULT_CSV_PATH),
         help="Caminho para CaixeiroGruposGA.csv (padrão: arquivo em av3/data).",
     )
+    parser.add_argument(
+        "--tsp-acceptable-epsilon",
+        type=float,
+        default=0.05,
+        help="Tolerância relativa ε para aceitar solução (slide: |f(x*) - ε|). Se alvo é desconhecido, exige melhora de (1-ε) sobre a melhor rota inicial.",
+    )
+    parser.add_argument(
+        "--tsp-target-length",
+        type=float,
+        default=None,
+        help="Valor de referência para o custo ótimo (se conhecido). Sem isso, usa a melhor rota inicial como referência.",
+    )
     parser.add_argument("--tsp-points-per-region", type=int, default=40, help="Quantidade de pontos por região gerada.")
     args = parser.parse_args()
 
@@ -109,6 +121,8 @@ def main() -> None:
             output_dir=output_root,
             seed=args.seed,
             points_per_region=args.tsp_points_per_region,
+            acceptable_epsilon=args.tsp_acceptable_epsilon,
+            target_length=args.tsp_target_length,
         )
         print("Resultados do GA (TSP 3D) salvos em", output_root / "genetic_tsp.json")
         print(_safe_json(tsp_results))
