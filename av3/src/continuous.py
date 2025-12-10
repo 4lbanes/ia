@@ -83,9 +83,10 @@ class HillClimbing:
         current = np.array([b[0] for b in problem.bounds], dtype=float)
         best_val = problem.evaluate(current)
         no_improve = 0
+        step_size = self.epsilon
         for step in range(1, self.max_iter + 1):
             # Avalia vários vizinhos na mesma iteração para aumentar a chance de atingir o ótimo.
-            candidates = current + rng.uniform(-self.epsilon, self.epsilon, size=(12, len(current)))
+            candidates = current + rng.uniform(-step_size, step_size, size=(64, len(current)))
             vals = np.apply_along_axis(problem.evaluate, 1, candidates)
             best_idx = int(np.argmin(vals) if problem.goal == "min" else np.argmax(vals))
             cand_val = float(vals[best_idx])
@@ -95,6 +96,8 @@ class HillClimbing:
                 no_improve = 0
             else:
                 no_improve += 1
+            if no_improve > 0 and no_improve % max(2, self.patience // 2) == 0:
+                step_size = max(step_size * 0.6, 1e-4)
             if no_improve >= self.patience:
                 return RunResult(current, best_val, step)
         return RunResult(current, best_val, self.max_iter)
@@ -111,14 +114,20 @@ class LocalRandomSearch:
         best_val = problem.evaluate(current)
         ranges = np.array([hi - lo for lo, hi in problem.bounds], dtype=float)
         no_improve = 0
+        sigma = self.sigma
         for step in range(1, self.max_iter + 1):
-            candidate = current + rng.normal(0, self.sigma * ranges)
-            cand_val = problem.evaluate(candidate)
+            candidates = current + rng.normal(0, sigma * ranges, size=(16, len(current)))
+            vals = np.apply_along_axis(problem.evaluate, 1, candidates)
+            best_idx = int(np.argmin(vals) if problem.goal == "min" else np.argmax(vals))
+            cand_val = float(vals[best_idx])
+            candidate = candidates[best_idx]
             if problem.is_better(cand_val, best_val):
                 current, best_val = candidate, cand_val
                 no_improve = 0
             else:
                 no_improve += 1
+            if no_improve > 0 and no_improve % max(2, self.patience // 2) == 0:
+                sigma = max(sigma * 0.7, 1e-4)
             if no_improve >= self.patience:
                 return RunResult(current, best_val, step)
         return RunResult(current, best_val, self.max_iter)
@@ -134,11 +143,17 @@ class GlobalRandomSearch:
         best_val = problem.evaluate(best)
         ranges = np.array([hi - lo for lo, hi in problem.bounds], dtype=float)
         for step in range(1, self.max_iter + 1):
-            if rng.random() < 0.5:
-                candidate = _random_bounds(problem.bounds, rng)
-            else:
-                candidate = best + rng.normal(0, self.sigma * ranges)
-            cand_val = problem.evaluate(candidate)
+            candidates = []
+            # Metade das amostras puramente aleatórias, metade explorando ao redor do melhor.
+            for _ in range(4):
+                candidates.append(_random_bounds(problem.bounds, rng))
+            scale = self.sigma * (0.995 ** step)
+            for _ in range(4):
+                candidates.append(best + rng.normal(0, scale * ranges))
+            vals = [problem.evaluate(c) for c in candidates]
+            idx = int(np.argmin(vals) if problem.goal == "min" else np.argmax(vals))
+            cand_val = float(vals[idx])
+            candidate = candidates[idx]
             if problem.is_better(cand_val, best_val):
                 best, best_val = candidate, cand_val
         return RunResult(best, best_val, self.max_iter)
@@ -211,7 +226,7 @@ def _select_hyperparameter(
     values: Sequence[float],
     builder: Callable[[float], object],
     rng: np.random.Generator,
-    warmup_runs: int = 12,
+    warmup_runs: int = 16,
 ) -> float:
     results: Dict[float, float] = {}
     hits: Dict[float, int] = {}
@@ -259,13 +274,13 @@ def run_continuous_experiments(
         )
         lrs_sigma = _select_hyperparameter(
             problem,
-            values=[0.8, 0.5, 0.2, 0.1, 0.05],
+            values=[0.8, 0.5, 0.2, 0.1, 0.05, 0.02, 0.01, 0.005, 0.001],
             builder=lambda sigma: LocalRandomSearch(sigma, max_iter=max_iter, patience=patience),
             rng=prob_rng,
         )
         grs_sigma = _select_hyperparameter(
             problem,
-            values=[0.8, 0.5, 0.2, 0.1, 0.05],
+            values=[0.8, 0.5, 0.2, 0.1, 0.05, 0.02, 0.01, 0.005, 0.001],
             builder=lambda sigma: GlobalRandomSearch(sigma, max_iter=max_iter),
             rng=prob_rng,
         )
