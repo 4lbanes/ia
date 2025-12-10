@@ -84,8 +84,12 @@ class HillClimbing:
         best_val = problem.evaluate(current)
         no_improve = 0
         for step in range(1, self.max_iter + 1):
-            candidate = current + rng.uniform(-self.epsilon, self.epsilon, size=len(current))
-            cand_val = problem.evaluate(candidate)
+            # Avalia vários vizinhos na mesma iteração para aumentar a chance de atingir o ótimo.
+            candidates = current + rng.uniform(-self.epsilon, self.epsilon, size=(12, len(current)))
+            vals = np.apply_along_axis(problem.evaluate, 1, candidates)
+            best_idx = int(np.argmin(vals) if problem.goal == "min" else np.argmax(vals))
+            cand_val = float(vals[best_idx])
+            candidate = candidates[best_idx]
             if problem.is_better(cand_val, best_val):
                 current, best_val = candidate, cand_val
                 no_improve = 0
@@ -207,7 +211,7 @@ def _select_hyperparameter(
     values: Sequence[float],
     builder: Callable[[float], object],
     rng: np.random.Generator,
-    warmup_runs: int = 6,
+    warmup_runs: int = 12,
 ) -> float:
     results: Dict[float, float] = {}
     hits: Dict[float, int] = {}

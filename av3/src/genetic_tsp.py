@@ -50,13 +50,24 @@ def generate_points(points_per_region: int, rng: np.random.Generator) -> PointCl
     return np.vstack(cloud)
 
 
-def _load_csv_points(csv_path: Path) -> PointCloud | None:
+def _load_csv_points(csv_path: Path, points_per_region: int) -> PointCloud | None:
     if csv_path.exists():
         data = np.genfromtxt(csv_path, delimiter=",", names=True, dtype=float)
         if data.dtype.names:
             data = np.column_stack([data[name] for name in data.dtype.names])
         if data.ndim == 2 and data.shape[1] >= 3:
-            return data[:, :3]
+            # Se o CSV tiver uma 4ª coluna indicando a região, amostramos até points_per_region por região (>0).
+            if data.shape[1] >= 4:
+                regions = data[:, 3].astype(int)
+                selected = []
+                for region in sorted(r for r in np.unique(regions) if r > 0)[:4]:
+                    idx = np.where(regions == region)[0][:points_per_region]
+                    if idx.size:
+                        selected.append(data[idx, :3])
+                if selected:
+                    return np.vstack(selected)
+            # Caso contrário, pega os primeiros points_per_region*4 pontos como fallback.
+            return data[: points_per_region * 4, :3]
     return None
 
 
@@ -69,7 +80,7 @@ def load_points(path: str | Path | None, points_per_region: int, rng: np.random.
         candidates.append(DEFAULT_CSV_PATH.with_name("CaixeiroGrupos.csv"))
 
     for csv_path in candidates:
-        data = _load_csv_points(csv_path)
+        data = _load_csv_points(csv_path, points_per_region)
         if data is not None:
             return data
     return generate_points(points_per_region, rng)
@@ -122,12 +133,13 @@ def run_ga(
     best_idx = int(np.argmin(lengths))
     best_length = lengths[best_idx]
     best_route = population[best_idx].copy()
+    initial_best = best_length
     # Regra de solução aceitável conforme slide: se |f(x*) - ε| foi atingido.
     # Se o ótimo (target_length) é desconhecido, usamos o melhor inicial como referência
-    # e exigimos uma melhoria relativa de (1 - ε).
+    # e exigimos uma melhoria relativa de (1 - ε) (minimização).
     if target_length is None:
-        target_length = best_length * (1.0 - config.acceptable_epsilon)
-        acceptable_threshold = target_length
+        target_length = initial_best
+        acceptable_threshold = target_length * (1.0 - config.acceptable_epsilon)
     else:
         acceptable_threshold = target_length * (1.0 + config.acceptable_epsilon)
 
@@ -182,13 +194,15 @@ def multiple_runs(
     generations: List[int] = []
     histories: List[List[float]] = []
     best_threshold: float | None = None
+    reference_length: float | None = None
 
     for _ in range(runs):
+        run_target = target_length  # Mantém valor fornecido pelo usuário; não propaga entre execuções.
         res = run_ga(
             points,
             config,
             seed=int(rng.integers(0, 2**32 - 1)),
-            target_length=target_length,
+            target_length=run_target,
         )
         histories.append(res["history"])  # type: ignore[index]
         if res["acceptable_generation"] is not None:
@@ -196,8 +210,8 @@ def multiple_runs(
         if best_overall is None or res["best_length"] < best_overall:
             best_overall = float(res["best_length"])
             best_route = list(res["best_route"])  # type: ignore[list-item]
-            target_length = res["target_length"]  # type: ignore[assignment]
             best_threshold = res["acceptable_threshold"]  # type: ignore[assignment]
+            reference_length = res["target_length"]  # type: ignore[assignment]
 
     mode_gen, freq = (None, 0)
     if generations:
@@ -211,7 +225,7 @@ def multiple_runs(
         "mode_frequency": freq,
         "generations_hit": generations,
         "histories": histories,
-        "target_length": target_length,
+        "target_length": reference_length if reference_length is not None else target_length,
         "acceptable_threshold": best_threshold,
         "runs": runs,
     }
