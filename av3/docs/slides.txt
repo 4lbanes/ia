@@ -1,0 +1,2338 @@
+Universidade de Fortaleza - UNIFOR
+
+Inteligência Artificial
+Computacional
+T296
+Msc. Prof. Paulo Cirillo Souza Barbosa
+Centro de Ciências Tecnológicas - CCT
+Fortaleza, Ceará, Brasil
+                                             Sumário
+
+    1 Busca e Otimização.
+    1.1   Definições.
+    1.2   Busca Local × Busca Global
+    1.3   Busca Univariada × Busca Multivariada
+    1.4   Busca Unimodal × Busca Multimodal
+    1.5   Algoritmo da Subida de Encosta
+    1.6   Algoritmo LRS - Busca Aleatória Local
+    1.7   Algoritmo GRS - Busca Aleatória Global
+    1.8   Algoritmo Têmpera Simulada
+    2 Computação Evolucionária.
+    2.1   Definições e Paradigmas
+    2.2   Algoritmos Genéticos.
+    2.3   Operadores Genéticos.
+    2.4   Aplicações.
+
+
+2/108      Prof. Paulo Cirillo                         CCT, UNIFOR
+                                      Inteligência Artificial
+
+    Otimização e Busca - Problemática.
+        • A otimização é uma área da matemática aplicada que possui o foco no estudo de métodos de
+          resolução de problemas em que se procura minimizar ou maximizar uma função numérica.
+        • Tal processo é realizado pela escolha sistemática dos valores de certas variáveis comumente
+          conhecidas como variáveis de decisão.
+        • A busca pode ser vista como uma metodologia de resolução de problemas que toma como base a
+          sua formulação em um espaço de estados e um elemento neste espaço é visto como uma solução
+          para o problema.
+        • Tendo em vista que nem toda solução tem a mesma qualidade, busca-se encontrar a ótima para o
+          problema.
+        • Exemplos: Projeto de circuitos integrados, escalonamento de jornadas de trabalho, arranjo físico
+          de maquinário em indústria, otimização de rede de telecomunicações, roteamento de veículos.
+
+
+
+3/108      Prof. Paulo Cirillo                                                                 CCT, UNIFOR
+                                        Inteligência Artificial
+
+    Otimização e Busca - Formalização do problema de otimização.
+        • Um problema de busca/otimização geralmente apresentam três componentes básicas:
+            1   Uma função objetivo/custo f : Rp → R
+
+
+
+
+4/108      Prof. Paulo Cirillo                                                              CCT, UNIFOR
+                                        Inteligência Artificial
+
+    Otimização e Busca - Formalização do problema de otimização.
+        • Um problema de busca/otimização geralmente apresentam três componentes básicas:
+            1 Uma função objetivo/custo f : Rp → R , que é o critério que deseja-se otimizar. Ou seja, a quantidade
+              a ser minimizada ou maximizada.
+            2 O conjunto de de variáveis de decisão x ∈ Rp
+
+
+
+
+4/108      Prof. Paulo Cirillo                                                                         CCT, UNIFOR
+                                        Inteligência Artificial
+
+    Otimização e Busca - Formalização do problema de otimização.
+        • Um problema de busca/otimização geralmente apresentam três componentes básicas:
+            1 Uma função objetivo/custo f : Rp → R , que é o critério que deseja-se otimizar. Ou seja, a quantidade
+              a ser minimizada ou maximizada.
+            2 O conjunto de de variáveis de decisão x ∈ Rp , que afetam diretamente a função objetivo.
+              Considerando x como variável independente, então f (x) quantifica a qualidade da solução candidata x
+            3 Um conjunto de restrições
+
+
+
+
+4/108      Prof. Paulo Cirillo                                                                         CCT, UNIFOR
+                                        Inteligência Artificial
+
+    Otimização e Busca - Formalização do problema de otimização.
+        • Um problema de busca/otimização geralmente apresentam três componentes básicas:
+            1 Uma função objetivo/custo f : Rp → R , que é o critério que deseja-se otimizar. Ou seja, a quantidade
+              a ser minimizada ou maximizada.
+            2 O conjunto de de variáveis de decisão x ∈ Rp , que afetam diretamente a função objetivo.
+              Considerando x como variável independente, então f (x) quantifica a qualidade da solução candidata x
+            3 Um conjunto de restrições , que limita os valores que podem ser atribuídos às variáveis
+              independentes.
+        • Além disso, outros conceitos importantes como:
+            1   Espaço de estados (S)
+
+
+
+
+4/108      Prof. Paulo Cirillo                                                                         CCT, UNIFOR
+                                          Inteligência Artificial
+
+    Otimização e Busca - Formalização do problema de otimização.
+        • Um problema de busca/otimização geralmente apresentam três componentes básicas:
+            1 Uma função objetivo/custo f : Rp → R , que é o critério que deseja-se otimizar. Ou seja, a quantidade
+              a ser minimizada ou maximizada.
+            2 O conjunto de de variáveis de decisão x ∈ Rp , que afetam diretamente a função objetivo.
+              Considerando x como variável independente, então f (x) quantifica a qualidade da solução candidata x
+            3 Um conjunto de restrições , que limita os valores que podem ser atribuídos às variáveis
+              independentes.
+        • Além disso, outros conceitos importantes como:
+            1   Espaço de estados (S) .
+            2   Vizinhança (V)
+
+
+
+
+4/108      Prof. Paulo Cirillo                                                                         CCT, UNIFOR
+                                        Inteligência Artificial
+
+    Otimização e Busca - Formalização do problema de otimização.
+        • Um problema de busca/otimização geralmente apresentam três componentes básicas:
+            1 Uma função objetivo/custo f : Rp → R , que é o critério que deseja-se otimizar. Ou seja, a quantidade
+              a ser minimizada ou maximizada.
+            2 O conjunto de de variáveis de decisão x ∈ Rp , que afetam diretamente a função objetivo.
+              Considerando x como variável independente, então f (x) quantifica a qualidade da solução candidata x
+            3 Um conjunto de restrições , que limita os valores que podem ser atribuídos às variáveis
+              independentes.
+        • Além disso, outros conceitos importantes como:
+            1 Espaço de estados (S) .
+            2 Vizinhança (V): Dado um ponto x ∈ S, V(x) representa todos os pontos y ∈ S que satisfazem
+              |x − y| ≤ ε (Este exemplo apenas para domínio contínuo).
+            3 Ótimo local
+
+
+
+
+4/108      Prof. Paulo Cirillo                                                                         CCT, UNIFOR
+                                         Inteligência Artificial
+
+    Otimização e Busca - Formalização do problema de otimização.
+        • Um problema de busca/otimização geralmente apresentam três componentes básicas:
+            1 Uma função objetivo/custo f : Rp → R , que é o critério que deseja-se otimizar. Ou seja, a quantidade
+              a ser minimizada ou maximizada.
+            2 O conjunto de de variáveis de decisão x ∈ Rp , que afetam diretamente a função objetivo.
+              Considerando x como variável independente, então f (x) quantifica a qualidade da solução candidata x
+            3 Um conjunto de restrições , que limita os valores que podem ser atribuídos às variáveis
+              independentes.
+        • Além disso, outros conceitos importantes como:
+            1 Espaço de estados (S) .
+            2 Vizinhança (V): Dado um ponto x ∈ S, V(x) representa todos os pontos y ∈ S que satisfazem
+              |x − y| ≤ ε (Este exemplo apenas para domínio contínuo).
+            3 Ótimo local (xl ∗): xl ∗ é um mínimo/máximo local se ∀x ∈ V(xl ∗), F(xl ∗) ≤ F(x) (ou para máximo:
+              F(xl ∗) ≥ F(x)
+            4 Ótimo global
+
+
+
+4/108      Prof. Paulo Cirillo                                                                          CCT, UNIFOR
+                                         Inteligência Artificial
+
+    Otimização e Busca - Formalização do problema de otimização.
+        • Um problema de busca/otimização geralmente apresentam três componentes básicas:
+            1 Uma função objetivo/custo f : Rp → R , que é o critério que deseja-se otimizar. Ou seja, a quantidade
+              a ser minimizada ou maximizada.
+            2 O conjunto de de variáveis de decisão x ∈ Rp , que afetam diretamente a função objetivo.
+              Considerando x como variável independente, então f (x) quantifica a qualidade da solução candidata x
+            3 Um conjunto de restrições , que limita os valores que podem ser atribuídos às variáveis
+              independentes.
+        • Além disso, outros conceitos importantes como:
+            1 Espaço de estados (S) .
+            2 Vizinhança (V): Dado um ponto x ∈ S, V(x) representa todos os pontos y ∈ S que satisfazem
+              |x − y| ≤ ε (Este exemplo apenas para domínio contínuo).
+            3 Ótimo local (xl ∗): xl ∗ é um mínimo/máximo local se ∀x ∈ V(xl ∗), F(xl ∗) ≤ F(x) (ou para máximo:
+              F(xl ∗) ≥ F(x)
+            4 Ótimo global (xg ∗): xg ∗ é um mínimo/máximo global se ∀x ∈ S, F(xg ∗) ≤ F(x) (ou para máximo:
+              F(xg ∗) ≥ F(x))
+
+4/108      Prof. Paulo Cirillo                                                                          CCT, UNIFOR
+                                         Inteligência Artificial
+
+
+    Otimização e Busca.
+        • Um problema de otimização, pode ser categorizado por:
+            1   A quantidade de variáveis: problema univariado ou multivariado.
+            2   O tipo da variável: problema de domínio contínuo, discreto, misto ou até por permutações de inteiros
+                (combinatória).
+            3   Grau de não-linearidade da função objetivo.
+            4   Restrições utilizadas: que definem a restrição no espaço de estados (neste caso o espaço é reduzido
+                para F).
+            5   Quantidade de soluções ótimas: unimodal × multimodal.
+            6   Quantidade de critérios de otimização.
+
+
+
+
+5/108      Prof. Paulo Cirillo                                                                          CCT, UNIFOR
+                               Inteligência Artificial
+
+    Otimização e Busca.
+
+
+
+
+6/108    Prof. Paulo Cirillo                             CCT, UNIFOR
+                                     Inteligência Artificial
+
+
+    Otimização e Busca.
+        • Um algoritmo de otimização, busca uma solução ótima por iterações que realizam uma
+          perturbação de uma solução ótima corrente, na esperança de encontrar uma nova solução ótima.
+        • Os algoritmos também possuem suas categorias: local, global, determinístico ou estocástico.
+        • Um problema de otimização sem restrição, pode ser escrito da seguinte forma:
+
+                                         minimize f (x),x = (x1 , x2 , · · · , xp )
+                                              subject to xj ∈ dom(xj )
+
+          em que dom(xj ) é o domínio da variável xj e para um problema contínuo, este domínio para cada
+          variável é o conjunto dos reais (R).
+
+
+
+
+7/108      Prof. Paulo Cirillo                                                                CCT, UNIFOR
+                                     Inteligência Artificial
+
+
+    Otimização e Busca - busca local.
+        • O problema pode ter natureza discreta ou contínua;
+        • No caso contínuo, chamado também de otimização numérica, pode-se ter um número infinito de
+          possíveis soluções.
+        • No caso discreto, também chamado de otimização combinatória, as soluções são frutos de uma
+          certa combinação de parâmetros discretos e possuem um número finito de soluções.
+        • Exemplos: sintonização de controladores PID ou redes neurais.
+        • Solução do problema do Caixeiro Viajante ou problema das 8 Rainhas.
+
+
+
+
+8/108      Prof. Paulo Cirillo                                                            CCT, UNIFOR
+                                      Inteligência Artificial
+
+    Otimização e Busca - busca local.
+        • Exemplos de funções: unimodal × multimodal
+
+
+                                 50
+
+
+                                 40
+
+
+                                 30
+
+
+                                 20
+
+
+                                 10
+
+
+                                       2   0   2    4   6       8   10   12
+
+
+9/108      Prof. Paulo Cirillo                                                CCT, UNIFOR
+                                    Inteligência Artificial
+
+     Otimização e Busca - busca local.
+         • Exemplos de funções: unimodal × multimodal
+
+
+
+
+                                                                                         5000
+                                                                                         4000
+                                                                                         3000
+                                                                                         2000
+                                                                                         1000
+
+
+                                                                                    40
+                                         40                                    20
+                                              20                           0
+                                                   0                  20
+                                                       20        40
+                                                            40
+10/108      Prof. Paulo Cirillo                                                                 CCT, UNIFOR
+                                    Inteligência Artificial
+
+     Otimização e Busca - busca local.
+         • Exemplos de funções: unimodal × multimodal
+
+
+
+
+                                         1000
+                                           0
+                                          1000
+                                          2000
+                                          3000
+                                          4000                                      10.0
+                                                                                    7.5
+                                          5000                                     5.0
+                                                                                  2.5
+                                                                                 0.0
+                                                                                2.5
+                                                                               5.0
+                                                                              7.5
+                                                 0   20   40   60   80   100 10.0
+
+
+
+11/108      Prof. Paulo Cirillo                                                            CCT, UNIFOR
+                                    Inteligência Artificial
+
+     Otimização e Busca - busca local.
+         • Exemplos de funções: unimodal × multimodal
+
+
+
+
+                                      2500
+                                      2000
+                                      1500
+                                      1000
+                                       500
+                                                                                                              2.0
+                                                                                                            1.5
+                                             3.0 2.5                                                      1.0
+                                                                                                        0.5
+                                                       2.0 1.5                                        0.0
+                                                                 1.0 0.5                            0.5
+                                                                                                 1.0
+                                                                           0.0 0.5            1.5
+                                                                                     1.0   2.0
+
+
+12/108      Prof. Paulo Cirillo                                                                                     CCT, UNIFOR
+                                     Inteligência Artificial
+
+     Otimização e Busca - busca local.
+         • Exemplos de funções: unimodal × multimodal
+                                   3.0
+
+                                   2.5
+
+                                   2.0
+
+                                   1.5
+
+                                   1.0
+
+                                   0.5
+
+                                   0.0
+
+                                   0.5
+
+                                   1.0
+                                         1.0   0.5   0.0   0.5   1.0   1.5   2.0
+
+
+13/108      Prof. Paulo Cirillo                                                    CCT, UNIFOR
+                                       Inteligência Artificial
+
+     Otimização e Busca - busca local.
+         • Exemplos de funções: unimodal × multimodal
+
+                                  14
+
+                                  12
+
+                                  10
+
+                                   8
+
+                                   6
+
+                                   4
+
+                                   2
+
+                                   0
+                                           4     2      0    2   4
+
+
+14/108      Prof. Paulo Cirillo                                      CCT, UNIFOR
+                                    Inteligência Artificial
+
+     Otimização e Busca - busca local.
+         • Exemplos de funções: unimodal × multimodal
+
+
+
+
+                                                                                   0.8
+                                                                                   0.7
+                                                                                   0.6
+                                                                                   0.5
+                                                                                   0.4
+                                                                                   0.3
+                                                                                   0.2
+
+                                                                                 3040
+                                                                              1020
+                                          40 30 20 10 0                     100
+                                                                           20
+                                                          10 20 30 40   4030
+
+
+
+
+15/108      Prof. Paulo Cirillo                                                          CCT, UNIFOR
+                                          Inteligência Artificial
+
+
+
+
+     Otimização e Busca - busca local.
+         • Uma estrutura básica (e que apenas realiza busca local), é aquela que possui geralmente os
+           seguintes passos:
+             1   Gerar uma solução candidata (aleatoriamente ou sistematicamente).
+             2   Avaliar a solução.
+             3   Voltar ao passo 1, ou retornar a solução ótima encontrada.
+
+
+
+
+16/108      Prof. Paulo Cirillo                                                                  CCT, UNIFOR
+                                       Inteligência Artificial
+
+
+
+     Otimização e Busca - busca local Algoritmo da Subida de Encosta (Hill Climbing).
+         • É um tipo de algoritmo de busca heurística local.
+         • A partir de um estado inicial, escolhe um sucessor melhor ("subir sempre"até) encontrar um pico.
+         • Para problemas convexos, este algoritmo encontra valores de ótimo global.
+         • Caso o problema seja não-convexo (multimodal), pode encontrar apenas o ótimo local.
+         • O algoritmo é baseado nos seguintes passos:
+
+
+
+
+17/108      Prof. Paulo Cirillo                                                                  CCT, UNIFOR
+                                                                Inteligência Artificial
+
+        Otimização e Busca - busca local Algoritmo da Subida de Encosta (Hill Climbing).
+
+        Algorithm 1: Pseudocódigo busca por subida de encosta.
+       1: Inicializar o ponto inicial (zero ou limite de domínio) x0
+       2: definir o valor ε para candidato vizinho.
+       3: Definir uma quantidade máxima de iterações maxit e quantidade máxima de candidatos (possíveis vizinhos) maxn .
+       4: Melhor valor xbest ← x0 e melhor valor computado fbest ← f (xbest ).
+       5: i ← 0
+       6: while i < maxit E houver melhoria do
+       7:      j←0
+       8:      melhoria ← false
+       9:      while j < maxn do
+      10:          j←j+1
+      11:          y ← candidato(xbest ).
+      12:          F ← f (y)
+      13:          if F > fbest then
+      14:               xbest ← y
+      15:               fbest ← F.
+      16:               melhoria ← true
+      17:               break
+      18:          end if
+      19:          j←j+1
+      20:      end while
+      21:      i←i+1
+      22: end while
+      23: FIM.
+18/108        Prof. Paulo Cirillo                                                                                          CCT, UNIFOR
+                                                                Inteligência Artificial
+
+
+
+     Otimização e Busca - busca local Algoritmo da Subida de Encosta (Hill Climbing).
+
+     Algorithm 2: Pseudocódigo candidato.
+         1: Definir o valor ε.
+         2: A partir de x Gerar vizinho-candidato aleatório y que respeite: |x − y| <= ε
+         3: FIM.
+
+          • Este algoritmo no que lhe concerne pode ser facilmente implementado em Python utilizando a
+            biblioteca Numpy:
+          • np.random.uniform(low=x-E,high=x+E)
+
+
+
+
+19/108           Prof. Paulo Cirillo                                                          CCT, UNIFOR
+                                            Inteligência Artificial
+
+     Otimização e Busca - busca local Algoritmo da Subida de Encosta (Hill Climbing) Exemplo 1.
+
+         • Considere que deseja-se maximizar o problema contínuo:
+                                                                          2
+                                                            f (x) = e−x         −2≥X ≥2
+
+                                                1.0
+
+
+                                                0.8
+
+
+                                                0.6
+
+
+                                                0.4
+
+
+                                                0.2
+
+
+                                                0.0
+                                                      2.0     1.5   1.0   0.5   0.0   0.5   1.0   1.5   2.0
+
+
+         • É um problema convexo (unimodal)?
+20/108      Prof. Paulo Cirillo                                                                               CCT, UNIFOR
+                                            Inteligência Artificial
+
+     Otimização e Busca - busca local Algoritmo da Subida de Encosta (Hill Climbing) Exemplo 1.
+
+         • Considere que deseja-se maximizar o problema contínuo:
+                                                                          2
+                                                            f (x) = e−x         −2≥X ≥2
+
+                                                1.0
+
+
+                                                0.8
+
+
+                                                0.6
+
+
+                                                0.4
+
+
+                                                0.2
+
+
+                                                0.0
+                                                      2.0     1.5   1.0   0.5   0.0   0.5   1.0   1.5   2.0
+
+
+         • É um problema convexo (unimodal)?
+21/108      Prof. Paulo Cirillo                                                                               CCT, UNIFOR
+                                            Inteligência Artificial
+
+     Otimização e Busca - busca local Algoritmo da Subida de Encosta (Hill Climbing) Exemplo 2.
+
+         • Considere que deseja-se maximizar o problema contínuo:
+                                                      2      2
+                                        f (x, y) = e−x +y            −2≥x≥2                                               −2≥y≥2
+
+
+
+
+                                                                                                                               0.8
+                                                                                                                               0.6
+                                                                                                                               0.4
+                                                                                                                               0.2
+
+                                                      2.0                                                                2.0
+                                                         1.5                                                          1.5
+                                                            1.0                                                    1.0
+                                                               0.5                                           0.5
+                                                                 0.0                                   0.0
+                                                                    0.5                              0.5
+                                                                       1.0                     1.0
+                                                                          1.5            1.5
+                                                                             2.0   2.0
+
+
+         • É um problema convexo (unimodal)?
+22/108      Prof. Paulo Cirillo                                                                                                      CCT, UNIFOR
+                                            Inteligência Artificial
+
+     Otimização e Busca - busca local Algoritmo da Subida de Encosta (Hill Climbing) Exemplo 2.
+
+         • Considere que deseja-se maximizar o problema contínuo:
+                                                      2       2
+                                        f (x, y) = e−x +y           −2≥x≥2                                 −2≥y≥2
+
+
+
+
+                                                                                                    2.0
+                                                       1.0                                          1.5
+                                                       0.8                                          1.0
+                                                                                                    0.5
+                                                       0.6                                          0.0
+                                                        0.4                                          0.5
+                                                                                                     1.0
+                                                        0.2                                          1.5
+                                                        0.0                                          2.0
+                                                              2.0 1.5 1.0 0.5 0.0 0.5 1.0 1.5 2.0
+
+
+
+         • É um problema convexo (unimodal)?
+23/108      Prof. Paulo Cirillo                                                                                     CCT, UNIFOR
+                                             Inteligência Artificial
+
+     Otimização e Busca - busca local Algoritmo da Subida de Encosta (Hill Climbing) Exemplo 2.
+
+         • Considere que deseja-se maximizar o problema contínuo:
+                                         2   2                  2               2
+                            f (x, y) = e−x +y + 2e−((x−1.7) +(y−1.7) )                  −2≥x≥4                          −2≥y≥4
+
+
+
+                                                                                                                 2.00
+                                                                                                                1.75
+                                                                                                                1.50
+                                                                                                                1.25
+                                                                                                                1.00
+                                                                                                                0.75
+                                                                                                                0.50
+                                                                                                                0.25
+
+                                                                                                                4
+                                                                                                            3
+                                                                                                        2
+                                                                                                    1
+                                                        2   1                                   0
+                                                                0   1                       1
+                                                                        2   3           2
+                                                                                    4
+
+
+
+         • É um problema convexo (unimodal)?
+24/108      Prof. Paulo Cirillo                                                                                                  CCT, UNIFOR
+                                             Inteligência Artificial
+
+     Otimização e Busca - busca local Algoritmo da Subida de Encosta (Hill Climbing) Exemplo 2.
+
+         • Considere que deseja-se maximizar o problema contínuo:
+                                         2   2                  2           2
+                            f (x, y) = e−x +y + 2e−((x−1.7) +(y−1.7) )              −2≥x≥4                       −2≥y≥4
+
+
+
+                                                                                                          2.00
+                                                                                                          1.75
+                                                                                                          1.50
+                                                                                                         1.25
+                                                                                                         1.00
+                                                                                                         0.75
+                                                                                                         0.50
+                                                                                                         0.25
+                                                                                                         0.00
+                                                                                                         4
+                                                                                                     3
+                                                                                                 2
+                                                                                             1
+                                                        2                                0
+                                                            1   0                       1
+                                                                    1   2           2
+                                                                            3   4
+
+
+         • É um problema convexo (unimodal)?
+25/108      Prof. Paulo Cirillo                                                                                           CCT, UNIFOR
+                                            Inteligência Artificial
+
+     Otimização e Busca - Busca Aleatória (Random Search)
+
+         • Considerando a definição de função objetivo/custo anterior: f : Rp → R, que produz uma saída
+           escalar y ∈ R e possui p (p ≥ 1 variáveis de entrada.
+         • Pode-se formalmente escrever:
+                                               y = f (x) = f (x1 , x2 , · · · , xp ),
+           em que x é um vetor cujas componentes são variáveis xi , i = 1, · · · , p
+         • Nos três exemplos anteriores, respectivamente, tem-se p = 1, p = 2, p = 2 e são funções contínuas
+           e de variação suave.
+         • As duas primeiras, são convexas, ou seja, possuem apenas um ponto extremo chamado de
+           máximo local.
+         • A última é um exemplo de função não convexa, tendo em vista que há dois picos. Um de máximo
+           local e outro máximo global.
+
+
+26/108      Prof. Paulo Cirillo                                                                  CCT, UNIFOR
+                                            Inteligência Artificial
+
+     Otimização e Busca - Busca Aleatória (Random Search)
+
+         • Em um problema formal de otimização de problema contínuo, o valor da variável x para o qual
+           y = f (x) produz seu maior valor, é chamado de valor ótimo de x (ou xopt ).
+         • Nesse sentido, xopt também pode ser vinculado ao mínimo da função-custo.
+         • Se o problema envolve uma função com duas variáveis, busca-se um vetor ótimo
+                          T
+           xopt = xopt yopt .
+         • O problema de minimização de funções (sem restrição) pode ser formalizado matematicamente
+           como: O vetor x ∈ Rp é o vetor ótimo se:
+
+                                        f (xopt ) < f (x), ∀x ̸= xopt OU xopt = arg min f (x)
+                                                                                     ∀x
+
+
+
+
+27/108      Prof. Paulo Cirillo                                                                 CCT, UNIFOR
+                                            Inteligência Artificial
+
+     Otimização e Busca - Busca Aleatória (Random Search)
+
+         • A vizinhança já discutida, também pode ser formalmente escrita na forma restrição de caixa.
+         • Essa é descrita na forma de intervalos com limites inferiores e superiores para cada uma das p
+           variáveis que compõem o vetor solução x ∈ Rp .
+         • Assim, escrevendo como a j−ésima componente de x como xj , e seus limites inferior e superior
+           como xlj e xuj , pode-se escrever a restrição do tipo caixa como:
+
+                                                            xlj ≤ xj ≤ xuj
+
+         • Ou através da versão vetorial:
+                                                            xl ≤ x ≤ xu
+         • Nesta última, xl e xu contém respectivamente, os limites inferiores e superiores para todas as
+           componentes do vetor solução x.
+
+
+28/108      Prof. Paulo Cirillo                                                                    CCT, UNIFOR
+                                            Inteligência Artificial
+
+     Otimização e Busca - Busca Aleatória (Random Search)
+
+         • OBS: O uso de "≤"na última equação é uma liberdade poética, pois tal comparação não pode ser
+           realizada entre dois vetores.
+         • Para lidar com valores que excedem o limite imposto pela restrição, podem-se utilizar os
+           seguintes métodos:
+             1   Gerar um número aleatório uniforme no intervalo xlj ≤ xj ≤ xuj :
+
+                                                    xj ∼ U(xlj , xuj ), se xj < xlj ou xj > xuj
+
+                 em que u ∼ U(a, b) representa um número aleatório uniformemente distribuído no intervalo (a,b).
+             2   Forçar que a solução que ocasiona uma violação de limite, assuma o extremo limite mais próximo. Se
+                 xj < xlj , então xj = xlj . Se xj > xuj , então xj = xuj
+
+
+
+
+29/108      Prof. Paulo Cirillo                                                                         CCT, UNIFOR
+                                            Inteligência Artificial
+
+
+     Otimização e Busca - Busca Aleatória Local (Local Random Search)
+
+         • O algoritmo de busca aleatória local (LRS, do inglês local random search), consiste em testar
+           soluções candidatas em uma vizinhança próxima ao xbest .
+         • É uma heurística estocástica, ao dependerem de rotinas que geram números aleatórios.
+         • Possui uma única solução a cada iteração.
+         • Não é um método bioinspirado.
+         • Não depende de gradiente
+         • Pode ser utilizado para funções descontínuas.
+
+
+
+
+30/108      Prof. Paulo Cirillo                                                                     CCT, UNIFOR
+                                            Inteligência Artificial
+
+
+     Otimização e Busca - Busca Aleatória (Local Random Search)
+
+         • O algoritmo possui a seguinte sequência de passos:
+           1.1 Especificar as restrições do tipo caixa xl ≤ x ≤ xu para todas as variáveis (especificar o domínio).
+           1.2 Especificar o desvio-padrão σ do ruído (perturbação aleatória) a ser adicionado à melhor solução
+               corrente para gerar candidatos.
+             2 Inicializar a solução melhor inicial xbest ∼ U(xl , xu ).
+             3 Avaliar a melhor solução inicial xopt , ou seja, calcular f (xopt ).
+             4 Gerar uma solução candidata xcand com valor xbest + n. Em que n ∈ Rd segue uma distribuição normal
+               variada de vetor médio nulo e matriz covariância σ 2 Id , ou seja, n ∼ N(0d , σ 2 Id ). OBS: Caso haja
+               violação das restrições, aplicar um dos métodos descritos anteriormente.
+             5 Avaliar a melhor solução candidata xcand , ou seja, calcular f (xcand ).
+
+
+
+
+31/108      Prof. Paulo Cirillo                                                                          CCT, UNIFOR
+                                            Inteligência Artificial
+
+
+     Otimização e Busca - Busca Aleatória (Local Random Search)
+
+         • O algoritmo possui a seguinte sequência de passos:
+             6 Verificar como a solução candidata está com relação à melhor solução corrente.
+
+                                       Se f (xcand ) > f (xbest ), Então, xbest = xcand f (xbest ) = f (xcand )
+
+             7 Vá para o passo 4 até o algoritmo não ter convergido ( permaneça inalterado por um certo número de
+               iterações) ou até o número máximo de iterações (Nmax ) seja atingido.
+             8 Se uma das condições do passo 7 seja verdadeira, encerre a execução do algoritmo e retorne xbest e
+               f (xbest )
+
+
+
+
+32/108      Prof. Paulo Cirillo                                                                                   CCT, UNIFOR
+                                                             Inteligência Artificial
+
+     Otimização e Busca - busca aleatória local (LRS).
+
+     Algorithm 3: Pseudocódigo busca aleatória local.
+      1: Definir uma quantidade máxima de iterações Nmax .
+      2: Definir xl e xu .
+      3: Definir valor de σ (perturbação aleatória).
+      4: xbest ∼ U(xl , xu )
+      5: fbest = f (xbest )
+      6: i ← 0
+      7: while i < Nmax do
+      8:       n ←∼ N(0, σ)
+      9:       xcand =← xbest + n
+     10:       Verificar a violação da restrição em caixa.
+     11:       fcand = f (xcand )
+     12:       if fcand > fbest then
+     13:             xbest = xcand
+     14:             fbest = fcand )
+     15:       end if
+     16: end while
+     17: FIM.
+
+
+
+
+33/108        Prof. Paulo Cirillo                                                      CCT, UNIFOR
+                                            Inteligência Artificial
+
+     Otimização e Busca - busca aleatória local Exemplo.
+
+         • Considere que deseja-se maximizar o problema contínuo:
+
+                                                      f (x) = x · sin(10 · π · x) + 1
+
+                                                3.0
+
+                                                2.5
+
+                                                2.0
+
+                                                1.5
+
+                                                1.0
+
+                                                0.5
+
+                                                0.0
+
+                                                0.5
+
+                                                1.0
+                                                      1.0   0.5   0.0   0.5   1.0   1.5   2.0
+
+
+         • É um problema convexo (unimodal)?
+34/108      Prof. Paulo Cirillo                                                                 CCT, UNIFOR
+                                            Inteligência Artificial
+
+     Otimização e Busca - busca aleatória local Exemplo.
+
+         • Considere que deseja-se maximizar o problema contínuo:
+
+                                                      f (x) = x · sin(10 · π · x) + 1
+
+                                                3.0
+
+                                                2.5
+
+                                                2.0
+
+                                                1.5
+
+                                                1.0
+
+                                                0.5
+
+                                                0.0
+
+                                                0.5
+
+                                                1.0
+                                                      1.0   0.5   0.0   0.5   1.0   1.5   2.0
+
+
+         • É possível encontrar o máximo global (para este caso). Se sim, o que deve ser feito?
+35/108      Prof. Paulo Cirillo                                                                   CCT, UNIFOR
+                                            Inteligência Artificial
+
+     Otimização e Busca - busca aleatória local Exemplo.
+
+         • Considere que deseja-se maximizar o problema contínuo:
+
+                                                      f (x) = x · sin(10 · π · x) + 1
+
+                                                3.0
+
+                                                2.5
+
+                                                2.0
+
+                                                1.5
+
+                                                1.0
+
+                                                0.5
+
+                                                0.0
+
+                                                0.5
+
+                                                1.0
+                                                      1.0   0.5   0.0   0.5   1.0   1.5   2.0
+
+
+         • É possível encontrar o máximo global (para este caso). Se sim, o que deve ser feito?
+36/108      Prof. Paulo Cirillo                                                                   CCT, UNIFOR
+                                            Inteligência Artificial
+
+     Otimização e Busca - Busca Aleatória Global (Random Search)
+
+         • O algoritmo de busca aleatória global (GRS), consiste em testar soluções candidatas que são
+           geradas aleatoriamente dentro do domínio da função a ser otimizada.
+         • Esse método será utilizado para encontrar o ponto ótimo e o valor ótimo correspondente da
+           função de interesse.
+         • O algoritmo é baseado em heurística, pois, não é derivado a partir de princípios matemáticos
+           formais, mas sim de conhecimento intuitivo ou informal sobre o domínio do problema.
+         • Para determinados casos, não se conhece os pontos mínimos e máximos de uma função
+           custo/objetivo. Dessa maneira, é um algoritmo que não possui garantia de encontrar a solução
+           ótima.
+         • Para contornar tal problema, várias execuções do algoritmo devem acontecer. A identificação da
+           solução subótima é dada pela solução com a maior frequência (moda das soluções).
+
+
+
+37/108      Prof. Paulo Cirillo                                                                CCT, UNIFOR
+                                            Inteligência Artificial
+
+     Otimização e Busca - Busca Aleatória (Random Search)
+
+         • O algoritmo a ser apresentado é estocástico pois:
+             1   Exige de uma solução inicial aleatória. Ou seja, a solução de partida, é gerada aleatoriamente.
+             2   A geração de um candidato potencial a cada iteração é dependente de rotinas em que são gerados
+                 números aleatórios.
+         • É um método de solução única, em que apenas uma solução-candidata é gerada a cada iteração.
+           Diferente de métodos populacionais como GAs
+         • Não é um método de inspiração biológica, pois sua formulação possui motivações puramente
+           computacionais. Diferente de algoritmos bioinspirados.
+         • É um método livre de gradiente, ou seja, não requer cálculo de gradientes para determinar as
+           direções de atualização de soluções. Por isso, podem ser utilizados para funções descontínuas
+           (discretas).
+
+
+
+38/108      Prof. Paulo Cirillo                                                                         CCT, UNIFOR
+                                            Inteligência Artificial
+
+     Otimização e Busca - Busca Aleatória (Random Search)
+
+         • O algoritmo a ser apresentado é estocástico pois:
+             1   Exige de uma solução inicial aleatória. Ou seja, a solução de partida, é gerada aleatoriamente.
+             2   A geração de um candidato potencial a cada iteração é dependente de rotinas em que são gerados
+                 números aleatórios.
+         • É um método de solução única, em que apenas uma solução-candidata é gerada a cada iteração.
+           Diferente de métodos populacionais como GAs
+         • Não é um método de inspiração biológica, pois sua formulação possui motivações puramente
+           computacionais. Diferente de algoritmos bioinspirados.
+         • É um método livre de gradiente, ou seja, não requer cálculo de gradientes para determinar as
+           direções de atualização de soluções. Por isso, podem ser utilizados para funções descontínuas
+           (discretas).
+
+
+
+39/108      Prof. Paulo Cirillo                                                                         CCT, UNIFOR
+                                            Inteligência Artificial
+
+     Otimização e Busca - Busca Aleatória (Random Search)
+
+         • O algoritmo possui a seguinte sequência de passos:
+             1 Especificar as restrições do tipo caixa xl ≤ x ≤ xu para todas as variáveis (especificar o domínio).
+             2 Inicializar a solução melhor inicial xbest ∼ U(xl , xu ).
+             3 Avaliar a melhor solução inicial xbest , ou seja, calcular f (xbest ).
+             4 Gerar uma solução candidata xcand com valores aleatórios uniformes: xcand ∼ U(xl , xu )
+             5 Avaliar a melhor solução candidata xcand , ou seja, calcular f (xcand ).
+             6 Verificar como a solução candidata está com relação à melhor solução corrente.
+
+                                       Se f (xcand ) > f (xbest ), Então, xbest = xcand f (xbest ) = f (xcand )
+
+             7 Vá para o passo 4 até o algoritmo não ter convergido ( permaneça inalterado por um certo número de
+               iterações) ou até o número máximo de iterações (Nmax ) seja atingido.
+             8 Se uma das condições do passo 7 seja verdadeira, encerre a execução do algoritmo e retorne xbest e
+               f (xbest )
+
+
+
+40/108      Prof. Paulo Cirillo                                                                                   CCT, UNIFOR
+                                             Inteligência Artificial
+
+     Otimização e Busca - busca aleatória global.
+
+     Algorithm 4: Pseudocódigo busca aleatória global.
+      1: Definir uma quantidade máxima de iterações Nmax .
+      2: Definir xl e xu .
+      3: xbest ∼ U(xl , xu )
+      4: fbest = f (xbest )
+      5: i ← 0
+      6: while i < Nmax do
+      7:     xcand =←∼ U(xl , xu )
+      8:     fcand = f (xcand )
+      9:     if fcand > fbest then
+     10:         xbest = xcand
+     11:         fbest = fcand )
+     12:     end if
+     13: end while
+     14: FIM.
+
+
+41/108      Prof. Paulo Cirillo                                        CCT, UNIFOR
+                                           Inteligência Artificial
+
+     Otimização e Busca - busca aleatória global Exemplo.
+
+         • Considere que deseja-se maximizar o problema contínuo:
+
+                                                      f (x) = x · sin(10 · π · x) + 1
+
+                                                3.0
+
+                                                2.5
+
+                                                2.0
+
+                                                1.5
+
+                                                1.0
+
+                                                0.5
+
+                                                0.0
+
+                                                0.5
+
+                                                1.0
+                                                      1.0   0.5   0.0   0.5   1.0   1.5   2.0
+
+
+         • É um problema convexo (unimodal)?
+42/108      Prof. Paulo Cirillo                                                                 CCT, UNIFOR
+                                            Inteligência Artificial
+
+     Otimização e Busca - busca aleatória local Exemplo.
+
+         • Considere que deseja-se maximizar o problema contínuo:
+
+                                                      f (x) = x · sin(10 · π · x) + 1
+
+                                                3.0
+
+                                                2.5
+
+                                                2.0
+
+                                                1.5
+
+                                                1.0
+
+                                                0.5
+
+                                                0.0
+
+                                                0.5
+
+                                                1.0
+                                                      1.0   0.5   0.0   0.5   1.0   1.5   2.0
+
+
+         • É um problema convexo (unimodal)?
+43/108      Prof. Paulo Cirillo                                                                 CCT, UNIFOR
+                                           Inteligência Artificial
+
+     Otimização e Busca - Têmpera Simulada (Simulated annealing)
+
+         • Algoritmo baseado em processo físico de têmpera.
+         • Tal procedimento é realizado para aumentar a dureza de certos metais ao aquecê-los em alta
+           temperatura inicialmente e em seguida resfriando-os gradualmente.
+         • Na computação, é um algoritmo para solução de problema de otimização, através de uma técnica
+           probabilística a fim de encontrar um ótimo global.
+         • Nesse sentido, pode ser utilizado para minimização da função-custo ou maximização da
+           função-objetivo (max f (x) / min(−f (x)).
+         • Imagine um exemplo em que será colocado uma bola de pingue-pongue em um dos gráficos
+           não-convexos exibidos anteriormente.
+         • Deseja-se que essa bola atinja o ponto mínimo do gráfico.
+
+
+
+44/108      Prof. Paulo Cirillo                                                              CCT, UNIFOR
+                                           Inteligência Artificial
+
+     Otimização e Busca - Têmpera Simulada (Simulated annealing)
+
+         • Pode ser que ao soltar a bola, ela acabe em um mínimo local (a depender a da função-custo é
+           muito provável que aconteça).
+         • Contudo, se agitarmos a superfície, a bola pode ser deslocada para fora do mínimo local.
+         • O truque está em agitar com força suficiente para fazer a bola sair dos mínimos locais, mas não o
+           bastante para desalojá-la do mínimo global.
+         • A solução de têmpera simulada trata-se de agitar inicialmente com força (ou seja, em alta
+           temperatura) e depois reduzir gradualmente a intensidade da agitação (baixar a temperatura).
+         • Diferente do algoritmo de subida de encosta, faz-se a escolha de um movimento aleatório. Caso
+           essa escolha melhore a situação, essa é aceita. Caso contrário, o algoritmo aceita o movimento
+           com alguma probabilidade menor que 1.
+
+
+
+
+45/108      Prof. Paulo Cirillo                                                                   CCT, UNIFOR
+                                           Inteligência Artificial
+
+     Otimização e Busca - Têmpera Simulada (Simulated annealing)
+
+         • Diferente do algoritmo de subida de encosta, faz-se a escolha de um movimento aleatório. Caso
+           essa escolha melhore a situação, essa é aceita. Caso contrário, o algoritmo aceita o movimento
+           com alguma probabilidade menor que 1.
+         • A probabilidade diminui exponencialmente com a "má qualidade"do vizinho. Esta também
+           diminui à medida que temperatura é reduzida.
+         • Ou seja, utiliza-se uma abordagem de escalonamento da temperatura ao longo das iterações do
+           algoritmo.
+         • Comumente, a aceitação probabilística é baseada na distribuição de Boltzmann-Gibbs dada por.
+                                                                     f (xj )−f (xi )
+                                                          Pij = e−         T
+
+
+
+           em que xj é o candidato, xi é o ótimo (corrente) e T é a temperatura no instante atual.
+
+
+46/108      Prof. Paulo Cirillo                                                                      CCT, UNIFOR
+                                                           Inteligência Artificial
+
+     Otimização e Busca - busca aleatória global.
+
+     Algorithm 5: Pseudocódigo Têmpera Simulada.
+      1: Definir uma quantidade máxima de iterações Nmax e T.
+      2: Definir xl e xu .
+      3: Definir valor de σ (perturbação aleatória).
+      4: xbest ∼ U(xl , xu )
+      5: fbest = f (xbest )
+      6: i ← 0
+      7: while i < Nmax do
+      8:       n ←∼ N(0, σ)
+      9:       xcand ← xbest + n
+     10:       Verificar a violação da restrição em caixa.
+     11:       fcand = f (xcand )
+                          −(fcand −fopt )/T
+     12:       Pij ← e
+     13:       if fcand < fbest ou Pij ≥ U(0, 1) then
+     14:             xbest = xcand
+     15:             fbest = fcand
+     16:       end if
+     17:       i←i+1
+     18:       escalona(T)
+     19: end while
+     20: FIM.
+
+47/108        Prof. Paulo Cirillo                                                    CCT, UNIFOR
+                                           Inteligência Artificial
+
+     Otimização e Busca - Têmpera Simulada (Simulated annealing)
+
+         • Faz sentido destacar que a convergência do algoritmo pode mudar a partir do escalonamento
+           definido.
+
+                                                   Ti+1 = (decaimento) · Ti
+                                                                  Ti
+                                               Ti+1 =                     √
+                                                        1 + (decaimento) · Ti
+                                          Ti+1 = Ti − ∆T       ∆T = (T0 − Tnt )/nt,
+     Nesta última, T0 representa a temperatura inicial, e Tnt é a temperatura final na última iteração nt.
+      • Por exemplo, dada a função a seguir com domínio de x ∈ R, [−5, 5], construa uma implementação
+         da têmpera simulada.
+                                       f (x) = −20e−0.2·|x| − ecos(2π·x) + 20 + e1
+
+
+48/108      Prof. Paulo Cirillo                                                                CCT, UNIFOR
+                                            Inteligência Artificial
+
+     Otimização e Busca - busca aleatória local Exemplo 2.
+
+         • Faça a implementação da têmpera simulada para resolução do problema de otimização:
+
+                                         f (x, y) = x2 sin (4 ∗ πx) − y sin (4 ∗ πy + π) + 1
+
+           Considere
+                                                    −1 ≤ x ≤ 2      −1≤y≤2
+         • Considere que a temperatura inicial vale T = 100 e o número máximo de iterações é 1000.
+         • O problema é unimodal ou multimodal?
+         • Considere que σ = .2.
+         • Em cada iteração, faça o algoritmo armazenar o valor de ótimo. É perceptível que o algoritmo
+           não se comporta de modo guloso?
+
+
+
+49/108      Prof. Paulo Cirillo                                                                 CCT, UNIFOR
+                                      Inteligência Artificial
+
+     Otimização/Busca - Computação Evolucionária.
+         • O processo evolucionário pode ser abstraído como um processo de busca/otimização em que se
+           tem o objetivo de melhorar a capacidade de um organismo (ou sistema) para sobreviver em
+           ambientes dinâmicos e competitivos.
+         • Evolução é um tema amplo e pode ter diferentes interpretações (ex: cósmica, química, orgânico,
+           sistemas feitos pelo homem), contudo, as aulas conduzidas têm um foco na evolução biológica.
+         • Mesmo com este foco, os debates na área são amplos, com a visão Darwinista e Lamarckista
+           sendo as mais populares e aceitas.
+         • Enquanto Darwin (1809-1882) é considerado o fundador das teorias da evolução e origem comum
+           (Origem das Espécies. 1859), Lamarck (1749-1829) é possivelmente o primeiro a teorizar sobre a
+           evolução biológica.
+
+
+
+50/108      Prof. Paulo Cirillo                                                               CCT, UNIFOR
+                                      Inteligência Artificial
+
+
+
+     Otimização/Busca - Computação Evolucionária (Teoria de Lamarck).
+         • A teoria de evolução de Lamarck é baseada na hereditariedade. Ou seja, na herança de
+           características adquiridas.
+         • A ideia principal é que indivíduos se adaptam ao longo de suas vidas e transmitem suas
+           características aos seus descendentes, que continuam a se adaptar.
+         • Essa adaptação é baseada no conceito de uso e desuso. Ou seja, com o tempo os indivíduos
+           perdem características que não são necessárias e aprimoram aquelas que são úteis.
+
+
+
+
+51/108      Prof. Paulo Cirillo                                                               CCT, UNIFOR
+                                         Inteligência Artificial
+
+     Otimização/Busca - Computação Evolucionária (Teoria de Darwin e Wallace).
+         • A teoria da seleção natural de Darwin é a base da evolução biológica e pode se resumida como:
+             • Em um mundo com recursos limitados e populações estáveis, cada indivíduo compete com outros
+               para sobrevivência.
+             • Os indivíduos que possuem as melhores características (traços), são mais propensos a sobrevivência e
+               reprodução, passando suas características para sua prole.
+             • Essas características desejáveis são herdadas pelas próximas gerações e ao longo do tempo, tornam-se
+               dominantes entre a população.
+         • A segunda parte da teoria de Darwin afirma que, durante a produção de um organismo
+           descendente, eventos aleatórios causam modificações nas características do organismo filho.
+           Caso essas novas características são um benefício para o organismo, então as chances de
+           sobrevivência são aumentadas.
+         • É importante destacar que a evolução não é um processo dirigido, com o intuito de maximizar
+           alguma característica das espécies.
+
+
+52/108      Prof. Paulo Cirillo                                                                        CCT, UNIFOR
+                                        Inteligência Artificial
+
+
+     Otimização/Busca - Computação Evolucionária (EC).
+         • A Computação Evolucionária (EC, do inglês Evolutionary Computing) refere-se a resolução de
+           problemas em sistemas que utilizam modelos computacionais baseados no processo
+           evolucionário biológico como:
+             1 Seleção Natural;
+             2 Sobrevivência do mais apto;
+             3 Reprodução;
+         • Estas são as componentes fundamentais desses sistemas.
+         • Assim, são modelos computacionais de processos naturais de evolução como uma ferramenta
+           para resolução de problemas.
+
+
+
+
+53/108      Prof. Paulo Cirillo                                                                CCT, UNIFOR
+                                          Inteligência Artificial
+
+     Algoritmo Evolucionário Genérico
+         • As maneiras diferentes que os componentes dos Algoritmos Evolucionários podem ser
+           implementados, resultam em diferentes paradigmas:
+             1   Algoritmos Genéticos (GA): Modelam a evolução genética;
+             2   Programação Genética (GP): Baseada em algoritmos genéticos, mas com programas individuais
+                 (representados por árvores).
+             3   Programação Evolucionária (EP): Que é uma derivação da simulação de comportamento adaptativo
+                 na evolução.
+             4   Estratégias Evolucionárias: que são voltados para a modelagem de parâmetros estratégicos que
+                 controlam a variação da evolução (evolução da evolução).
+             5   Evolução Cultural (CE): que modela a evolução cultural de uma população e como a cultura
+                 influencia a evolução genética e fenotípica dos indivíduos.
+             6   Algoritmos Coevolucionários: em que indivíduos inicialmente "desprovidos"evoluem através da
+                 cooperação ou em concorrência entre si, adquirindo as características necessárias para sobreviver.
+         • Apesar de existirem diferentes paradigmas, ambos compartilham a ideia que soluções melhores
+           evoluem gradualmente a partir de uma população de soluções, contudo, diferem em sua
+           representação das soluções, operadores genéticos e estratégias de seleção.
+54/108      Prof. Paulo Cirillo                                                                         CCT, UNIFOR
+                                         Inteligência Artificial
+
+     Algoritmo Evolucionário Genérico.
+         • A evolução via seleção natural de uma população de indivíduos aleatórios pode ser vista como
+           uma busca no espaço de estados. Neste caso os possíveis valores do espaço são cromossomos.
+         • Nesse sentido, algoritmos evolucionários são baseados em busca estocástica a fim de encontrar
+           uma solução ótima para determinado problema.
+         • A busca evolucionária é influenciada pelos seguintes componentes dos Algoritmos
+           Evolucionários:
+             1   Codificação (encoding) de soluções para o problema em forma de cromossomo;
+             2   Uma função para avaliar a aptidão dos indivíduos.
+             3   Inicialização de uma população inicial
+             4   Operadores de seleção;
+             5   Operadores de reprodução.
+
+
+
+
+55/108      Prof. Paulo Cirillo                                                                CCT, UNIFOR
+                                               Inteligência Artificial
+
+     Algoritmo Evolucionário Genérico
+     Algorithm 6: Algoritmo Evolucionário Genérico.
+         1: Seja t = 0 o contador de gerações;
+         2: Crie e inicialize uma população p−dimensional, C(0) com N indivíduos.
+         3: while critério de parada não foi aceito do
+         4:Avalie a função de aptidão, f (xi (t)) de cada indivíduo (cromossomo), xi (t);
+         5:Aplique a operação de Seleção,
+      6:   Aplique a Reprodução* para criar descendentes;
+      7:   compor a população para C(t + 1);
+      8:   Avance para a próxima geração, t = t + 1;
+      9: end while
+     10: FIM.
+
+          • Exemplo de partida para EA Genetic Cars.
+
+
+56/108        Prof. Paulo Cirillo                                                           CCT, UNIFOR
+                                       Inteligência Artificial
+
+
+     Algoritmos Evolucionários - O cromossomo
+         • Na natureza, os organismos possuem características que influenciam sua capacidade de
+           sobreviver e reproduzir.
+         • Essas características são representadas por uma imensa cadeia de informações contidas no
+           cromossomo do organismo.
+         • Cromossomos são estruturas de moléculas compactas entrelaçadas de DNA.
+         • Cada cromossomo possui uma abundância de genes, em que cada gene representa a unidade de
+           hereditariedade.
+         • Os genes determinam diversos aspectos da anatomia e fisiologia e cada indivíduo possui uma
+           sequência única de genes.
+
+
+
+
+57/108      Prof. Paulo Cirillo                                                                CCT, UNIFOR
+                                      Inteligência Artificial
+
+     Algoritmos Evolucionários - O cromossomo
+         • No contexto de EC, cada indivíduo representa uma solução-candidata de um problema de
+           otimização.
+         • As características de um indivíduo são representadas por um cromossomo (algumas obras
+           também referem-se a genoma).
+         • Essas características são referentes às variáveis do problema de otimização.
+         • Cada variável que necessita ser otimizada, é chamada de gene, a menor unidade de informação
+           possível.
+         • As características de um indivíduo podem ser dividias em duas classes de informação
+           evolucionária:
+             1   Genótipo.
+             2   Fenótipo.
+
+
+
+58/108      Prof. Paulo Cirillo                                                              CCT, UNIFOR
+                                            Inteligência Artificial
+
+
+     Algoritmos Evolucionários - O cromossomo
+         • As características de um indivíduo podem ser dividias em duas classes de informação
+           evolucionária:
+             1   Genótipo:
+                   • Descreve a composição genética de um indivíduo, e como foi herdado de seus pais.
+                   • Representa qual tipo de gene o indivíduo possui.
+                   • É herdado dos pais e pode ser transmitido para a prole.
+             2   Fenótipo:
+                   • São os traços comportamentais de um indivíduo
+                   • Este define a aparência de um indivíduo em termos comportamentais observáveis.
+                   • Normalmente essas características podem ser vistas na interação entre genótipo e ambiente.
+
+
+
+
+59/108      Prof. Paulo Cirillo                                                                                   CCT, UNIFOR
+                                      Inteligência Artificial
+
+     Algoritmos Evolucionários - O cromossomo (representação)
+         • Um passo importante no projeto de EA, é encontrar uma representação apropriada das
+           soluções-candidatas
+         • A complexidade e desempenho dos algoritmos de busca dependem desta representação.
+         • Alguém arrisca um novo palpite sobre qual seria essa representação?
+
+
+
+
+60/108      Prof. Paulo Cirillo                                                            CCT, UNIFOR
+                                      Inteligência Artificial
+
+     Algoritmos Evolucionários - O cromossomo (representação)
+         • Um passo importante no projeto de EA, é encontrar uma representação apropriada das
+           soluções-candidatas
+         • A complexidade e desempenho dos algoritmos de busca dependem desta representação.
+         • Alguém arrisca um novo palpite sobre qual seria essa representação?
+         • Bom, a maioria dos EAs representas suas soluções-candidatas como um vetor de um tipo
+           específico de dados.
+         • Uma exceção está presenta na programação genética, em que seus indivíduos são representados
+           em forma de árvore.
+         • A representação de um esquema clássico, é um vetor de valores binários com tamanho fixo.
+         • Nesse caso, cada cromossomo é um vetor com tamanho nd bits.
+
+
+
+60/108      Prof. Paulo Cirillo                                                              CCT, UNIFOR
+                                       Inteligência Artificial
+
+     Algoritmos Evolucionários - O cromossomo (representação)
+         • A representação clássica, é um vetor de valores binários com tamanho fixo.
+         • Se o espaço de estados do problema possui uma dimensão p, cada indivíduo consiste em p
+           variáveis, em que cada variável é codificada como uma sequência de bits.
+         • Se o problema possui variáveis de valores nominais (categóricos), cada variável pode ser
+           codificada como uma cadeia de bits nd -dimensional, em que 2nd é o número total de valores
+           nominais para aquela variável.
+         • A abordagem comum para problemas com variáveis de valores contínuos, é projetar uma função
+           que realiza o mapeamento de cada valor real para um vetor de bits com dimensão nd . Ou seja,
+           h : R → (0, 1)nd .
+         • Como os problemas anteriores, o domínio do espaço contínuo precisa ser restrito a um limite
+           finito, [xmin , xmax ] = [l, u].
+
+
+
+61/108      Prof. Paulo Cirillo                                                              CCT, UNIFOR
+                                       Inteligência Artificial
+
+     Algoritmos Evolucionários - O cromossomo (representação)
+         • Uma codificação binária padrão pode ser utilizada para transformar um indivíduo na forma
+                                    
+           x = x1 · · · xj · · · xp , com xj ∈ R para a forma de valores binários
+           B = b1 · · · bj · · · bp , em que bj ∈ Rnd
+                                      
+
+         • Neste caso, o total de bits é nb = p · nd .
+         • A decodificação é um passo importante, pois, cada indivíduo é avaliado pela sua função aptidão.
+         • Assim, a função que decodifica cada bj para sua representação em ponto flutuante pode é dada
+           por:                                                    Ñ                            é
+                                                                      d −1
+                                                                     nX
+                                                 xmax,j − xmin,j
+                               Φ(bj ) = xmin,j +                 ·         bj [nd − l − 1] · 2l
+                                                    2nd − 1
+                                                                l=0
+
+         • Essa abordagem foi inicialmente proposta e utilizada para resolver problemas com variáveis
+           contínuas em 75 por Holland e De Jong.
+
+62/108      Prof. Paulo Cirillo                                                                CCT, UNIFOR
+                                       Inteligência Artificial
+
+     Algoritmos Evolucionários - O cromossomo (representação)
+         • Faz sentido destacar que a representação em sequência de bits, a busca é realizada em um espaço
+           de estado discreto.
+         • Assim, o algoritmo pode falhar em encontrar um ótimo preciso.
+         • Uma maneira de contornar é definir a quantidade de bits que deseja-se trabalhar. Quando mais
+           bits, mais precisão numérica se tem.
+         • Longos cromossomos são difíceis de manipular.
+         • De fato, a conversão número real para sequência de bits com tamanho nd , a acurácia máxima é:
+
+                                                    xmax,j − xmin,j
+                                                       2nd − 1
+         • Problemáticas associadas a essa representação clássica serão discutidas em um momento futuro
+           oportuno.
+
+63/108      Prof. Paulo Cirillo                                                                 CCT, UNIFOR
+                                       Inteligência Artificial
+
+     Algoritmos Evolucionários - População Inicial
+         • O primeiro passo para aplicar EA de modo a resolver um problema de otimização é gerar a
+           população inicial. A maneira padrão para gerar essa população inicial é atribuir valores
+           aleatórios para cada gene de cada cromossomo.
+         • O objetivo de uma seleção aleatória é garantir que a população inicial tem uma representação
+           uniforme do espaço de estados, evitando que regiões sejam negligenciadas pelo processo de
+           otimização.
+         • O tamanho da população inicial N tem consequências em termos de custo computacional e
+           capacidade de exploração.
+         • Um grande número de indivíduos faz com que a diversidade aumente, e assim, melhorando a
+           habilidade de exploração. Contudo, maior é a complexidade computacional por geração.
+         • Uma população pequena, pode representar uma pequena parte do espaço de estados. Assim,
+           enquanto a complexidade computacional é baixa, o EA pode necessitar de mais gerações para
+           convergência do que para uma população maior.
+64/108      Prof. Paulo Cirillo                                                                CCT, UNIFOR
+                                      Inteligência Artificial
+
+     Algoritmos Evolucionários - Função de Aptidão (Fitness Function)
+         • No modelo Darwinista de evolução, indivíduos com as melhores características tem melhores
+           chances de sobreviver e reproduzir.
+         • Para determinar a capacidade de um indivíduo no EA de sobreviver, uma função matemática é
+           usada para quantificar quão boa é a solução por ele representada.
+         • A função aptidão (ou fitness function) f mapeia uma representação de um cromossomo para um
+           escalar, f : Γp → R. Em que Γ representa o tipo de dado dos elementos do cromossomo
+           p-dimensional.
+         • A função aptidão pode representar a função objetivo que descreve o problema de otimização.
+         • Geralmente, a função de aptidão produz uma medida absoluta de aptidão. Ou seja, a solução
+           representada por um cromossomo é diretamente avaliada usando a função objetivo.
+
+
+
+65/108      Prof. Paulo Cirillo                                                              CCT, UNIFOR
+                                        Inteligência Artificial
+
+     Algoritmos Evolucionários - Função de Aptidão (Fitness Function)
+         • Não necessariamente a representação cromossômica corresponde à representação esperada pela
+           função objetivo.
+         • Nesses casos a função aptidão detalhada pode ser escrita:
+
+                                                      Φ     Ψ     Υ
+                                               f : SC −
+                                                      → SX −
+                                                           →R−
+                                                             → R+
+
+         • Em que SC representa o espaço de estados da função objetivo.
+         • Φ, Ψ e Υ representam, respectivamente, a função decodificadora cromossômica, a função objetivo
+           e a função escalonadora (opcional).
+         • Esta última, do ponto de vista de projeto de um EA, é utilizada para garantir valores positivos da
+           função aptidão.
+
+
+
+66/108      Prof. Paulo Cirillo                                                                   CCT, UNIFOR
+                                         Inteligência Artificial
+
+     Algoritmos Evolucionários - Operadores Evolucionários (Seleção)
+         • Seleção é um dos principais operadores em EA e relaciona diretamente com o conceito da
+           sobrevivência do mais apto de Darwin.
+         • O objetivo principal da seleção é destacar as melhores soluções.
+         • Isso é realizado por meio de dois passos principais em EA:
+             1 Seleção de uma nova população selecionada no final de cada geração para servir como população da
+               próxima geração. Essa escolha deve ser feita na prole, ou na combinação de prole e pais, de modo que
+               os indivíduos selecionados sobrevivam as próximas gerações.
+             2 Reprodução: A prole é criada através de outros operadores evolucionários (recombinação, mutação).
+               Nesse sentido, a seleção para mutação deve acontecer para os indivíduos "fracos", com a esperança de
+               resultar melhores características (traços) nestes. Para o caso da recombinação, os melhores indivíduos
+               devem ser selecionados para que a próxima prole tenha o material genético destes indivíduos
+               "superiores".
+
+
+
+67/108      Prof. Paulo Cirillo                                                                          CCT, UNIFOR
+                                       Inteligência Artificial
+
+     Algoritmos Evolucionários - Operadores Evolucionários (Seleção)
+         • Há diversos operadores de seleção, contudo serão destacados os amplamente utilizados em EAs.
+         • Os operadores de seleção são categorizados por sua pressão seletiva (takeover time). É definido
+           pela velocidade com que a melhor solução ocupará toda a população por aplicação repetida do
+           operador de seleção.
+         • Um operador com uma alta pressão seletiva diminui a diversidade da população de modo mais
+           rápido e leva a uma convergência prematura com soluções subótimas, bem como limita a
+           capacidade de exploração da população.
+         • Qual seria um operador simples de seleção e que tenha uma baixa pressão seletiva?
+
+
+
+
+68/108      Prof. Paulo Cirillo                                                                  CCT, UNIFOR
+                                       Inteligência Artificial
+
+     Algoritmos Evolucionários - Operadores Evolucionários (Seleção)
+         • Há diversos operadores de seleção, contudo serão destacados os amplamente utilizados em EAs.
+         • Os operadores de seleção são categorizados por sua pressão seletiva (takeover time). É definido
+           pela velocidade com que a melhor solução ocupará toda a população por aplicação repetida do
+           operador de seleção.
+         • Um operador com uma alta pressão seletiva diminui a diversidade da população de modo mais
+           rápido e leva a uma convergência prematura com soluções subótimas, bem como limita a
+           capacidade de exploração da população.
+         • Qual seria um operador simples de seleção e que tenha uma baixa pressão seletiva?
+         • Operador Aleatório, em que cada indivíduo possui a mesma probabilidade de ser selecionado
+           ( N1 , em que N é o tamanho da população).
+
+
+
+68/108      Prof. Paulo Cirillo                                                                  CCT, UNIFOR
+                                         Inteligência Artificial
+
+     Algoritmos Evolucionários - Operadores Evolucionários (Seleção Proporcional)
+         • Seleção Proporcional:
+             • É baseado na probabilidade de seleção proporcional a função de aptidão.
+             • Desta maneira, os melhores indivíduos são selecionados com base na função aptidão.
+
+                                                              fΨ (xi (t))
+                                                       pi = PN
+                                                             k=1 fΨ (xk (t))
+
+             • Em que N representa o total de indivíduos na população.
+             • Esta abordagem pode ser mais generalista, ao utilizar a função escalonadora para limitar aos R+
+
+                                                              fΥ (xi (t))
+                                                       pi = PN
+                                                             k=1 fΥ (xk (t))
+
+
+
+
+69/108      Prof. Paulo Cirillo                                                                        CCT, UNIFOR
+                                            Inteligência Artificial
+
+     Algoritmos Evolucionários - Operadores Evolucionários (Seleção Proporcional)
+         • Seleção Proporcional:
+             • Esta abordagem pode ser mais generalista, ao utilizar a função escalonadora para limitar aos R+
+
+                                                                    fΥ (xi (t))
+                                                             pi = PN
+                                                                   k=1 fΥ (xk (t))
+             • Para problemas de minimização, a função fΥ (·) ou Υ(·) pode simplesmente ser:
+
+                                                  fΥ (xi (t)) = Υ(xi (t)) = fmax (t) − fΨ (xi (t))
+
+                                                                                        1
+                                                fΥ (xi (t)) = Υ(xi (t)) =
+                                                                            1 + fΨ (xi (t)) − fmin (t)
+             • Nessas, fΨ (xi (t)) = Ψ(xi (t)) é a função de aptidão não escalonada, e fmin (t) e fmax (t) são
+               respectivamente, o mínimo e o máximo observado até aquela geração
+
+
+
+70/108      Prof. Paulo Cirillo                                                                                  CCT, UNIFOR
+                                            Inteligência Artificial
+
+     Algoritmos Evolucionários - Operadores Evolucionários (Seleção Proporcional)
+         • Seleção Proporcional:
+             • Esta abordagem pode ser mais generalista, ao utilizar a função escalonadora para limitar aos R+
+
+                                                                    fΥ (xi (t))
+                                                             pi = PN
+                                                                   k=1 fΥ (xk (t))
+             • Para problemas de maximização, a função fΥ (·) ou Υ(·) pode simplesmente ser:
+
+                                                                                       1
+                                               fΥ (xi (t)) = Υ(xi (t)) =
+                                                                           1 + fmax (t) − fΨ (xi (t))
+             • Nessas, fΨ (xi (t)) = Ψ(xi (t)) é a função de aptidão não escalonada, e fmin (t) e fmax (t) são
+               respectivamente, o mínimo e o máximo observado até aquela geração
+
+
+
+
+71/108      Prof. Paulo Cirillo                                                                                  CCT, UNIFOR
+                                                Inteligência Artificial
+
+     Algoritmos Evolucionários - Operadores Evolucionários (Seleção Proporcional)
+          • A seleção dos indivíduos pode ser realizada utilizando o método da roleta que é um dos
+            exemplos mais clássicos de seletor proporcional para funções de aptidão normalizadas.
+     Algorithm 7: Seleção pelo método da Roleta (considerando a maximização da aptidão).
+         1: Seja i = 1, em que i representa o i−ésimo cromossomo.
+         2: Computar a probabilidade pi do cromossomo xi .
+         3: Soma = pi
+         4: r ∼ U(0, 1)
+         5: while Soma < r do
+         6:   i=i+1
+         7:   Soma = Soma + pi (que significa avançar para o próximo cromossomo).
+         8: end while
+         9: retorna xi como indivíduo selecionado.
+
+
+
+72/108        Prof. Paulo Cirillo                                                               CCT, UNIFOR
+                                       Inteligência Artificial
+
+     Algoritmos Evolucionários - Operadores Evolucionários (Seleção)
+         • Outro método para seleção é chamado de seleção por torneio. Este, seleciona um grupo de nst
+           indivíduos aleatórios da população (em que nst < N).
+         • O desempenho dos nst são avaliados e o melhor indivíduo deste grupo é selecionado.
+         • Escolhendo um grupo não tão grande, a seleção por torneio previne que o melhor indivíduo
+           sempre domine.
+         • Contudo, um nst pequeno, faz com que as chances de indivíduos ruins sejam selecionados,
+           aumentem.
+         • Mesmo sendo um método que utiliza a função aptidão para selecionar o melhor indivíduo, a
+           seleção aleatória dos indivíduos reduz a pressão seletiva em comparação a seleção proporcional.
+         • Contudo, a pressão seletiva é diretamente proporcional a quantidade de indivíduos no torneio.
+           Se nst = N, então, o melhor indivíduo sempre será selecionado, resultando em uma alta pressão
+           seletiva.
+         • Se nst = 1, então,
+73/108      Prof. Paulo Cirillo                                                                 CCT, UNIFOR
+                                       Inteligência Artificial
+
+     Algoritmos Evolucionários - Operadores Evolucionários (Seleção)
+         • Outro método para seleção é chamado de seleção por torneio. Este, seleciona um grupo de nst
+           indivíduos aleatórios da população (em que nst < N).
+         • O desempenho dos nst são avaliados e o melhor indivíduo deste grupo é selecionado.
+         • Escolhendo um grupo não tão grande, a seleção por torneio previne que o melhor indivíduo
+           sempre domine.
+         • Contudo, um nst pequeno, faz com que as chances de indivíduos ruins sejam selecionados,
+           aumentem.
+         • Mesmo sendo um método que utiliza a função aptidão para selecionar o melhor indivíduo, a
+           seleção aleatória dos indivíduos reduz a pressão seletiva em comparação a seleção proporcional.
+         • Contudo, a pressão seletiva é diretamente proporcional a quantidade de indivíduos no torneio.
+           Se nst = N, então, o melhor indivíduo sempre será selecionado, resultando em uma alta pressão
+           seletiva.
+         • Se nst = 1, então, uma seleção aleatória é realizada.
+73/108      Prof. Paulo Cirillo                                                                 CCT, UNIFOR
+                                       Inteligência Artificial
+
+
+
+     Algoritmos Evolucionários - Operadores Evolucionários (Seleção)
+         • Há também a seleção por Elitismo. Em que os melhores indivíduos de uma população atual são
+           mantidos para uma próxima geração. Neste caso, nenhuma operação de mutação é realizada.
+         • Algumas bibliografias consideram que o Elitismo é um operador a parte.
+         • É uma seleção determinística.
+         • É importante ter em mente que quanto maior o grupo elitista, menor é a diversidade da nova
+           população.
+
+
+
+
+74/108      Prof. Paulo Cirillo                                                               CCT, UNIFOR
+                                       Inteligência Artificial
+
+     Algoritmos Evolucionários - Operadores de Reprodução
+         • Reprodução é o processo de criação da prole através da seleção de parentes ao aplicar os
+           operadores:
+             1   Recombinação
+             2   Mutação.
+         • A recombinação é o processo de criar um ou mais indivíduos, através da combinação genética
+           selecionada de modo aleatório de dois ou mais pais.
+         • A mutação é o processo de modificar valores dos genes em um cromossomo de maneira aleatória.
+           O objetivo principal desta abordagem é introduzir um novo material genético na população, e
+           assim, aumentar a diversidade.
+         • A mutação precisa ser aplicada com cuidado, pois, pode distorcer um bom material genético de
+           indivíduos aptos.
+         • Normalmente, define-se uma probabilidade de aplicação da mutação. Esta pode ser proporcional
+           a aptidão dos indivíduos. Quanto menor a aptidão do indivíduo, maior é sua mutação.
+
+75/108      Prof. Paulo Cirillo                                                                  CCT, UNIFOR
+                                       Inteligência Artificial
+
+
+
+     Algoritmos Evolucionários - Critérios de Parada
+         • Os diferentes operadores evolucionários são aplicados nos EA, até que um critério de parada seja
+           atingido.
+         • Um critério de parada simples é limitar o número máximo de gerações que o EA é permitido.
+         • Outro critério pode ser associado à convergência da população. Neste caso a convergência
+           acontece quando uma população se torna estagnada. Ou seja, quando não há modificações
+           genotípicas ou fenotípicas na população.
+
+
+
+
+76/108      Prof. Paulo Cirillo                                                                 CCT, UNIFOR
+                                              Inteligência Artificial
+
+     Algoritmos Evolucionários - Critérios de Parada
+         • Os critérios de convergência podem ter a natureza:
+             1   Parada quando nenhuma melhoria é observada ao longo de uma quantidade de gerações:
+                   • Esta pode ser identificada ao monitorar a aptidão do melhor indivíduo.
+                   • Se não há mudança significante ao longo de uma janela de gerações, então o EA deve ser parado.
+             2   Parada quando não há modificações na população.
+                   • Se em um determinado período de gerações consecutivas, as transformações médias genotípicas são
+                     pequenas, então EA deve ser parado.
+             3   Parada quando uma solução aceitável é encontrada:
+                   • Considerando que x∗ (t) representa o ótimo da função aptidão, então, se o melhor indivíduo atual xi é um
+                     tal que Ψ(xi ) ≤ |Ψ(x∗ ) − ε|, então uma solução aceitável foi encontrada. Nesta, ε representa o erro limite.
+                   • É importante destacar que um valor alto para ε significa encontrar soluções possivelmente ruins.
+                   • Escolher um valor muito pequeno para ε pode causar a repetição infinita do EA (caso o máximo de
+                     gerações não seja definido).
+
+
+
+
+77/108      Prof. Paulo Cirillo                                                                                        CCT, UNIFOR
+                                          Inteligência Artificial
+
+     Algoritmos Genéticos.
+         • Algoritmos Genéticos (GAs) são possivelmente o primeiro modelo que simula sistemas genéticos.
+         • Seu conceito foi desenvolvido por uma combinação de pesquisadores: Fraser (1957),
+           Bremermann (1962) e Holland (1975).
+         • A popularização está muito associada a Holland, que é considerado o pai de Algoritmos
+           Genéticos.
+         • GAs, tem a característica de expressar seus indivíduos utilizando genótipos.
+         • É baseado na produção de populações a cada geração através da aplicação sequencial de três
+           operadores:
+             1   Seleção: para modelar a sobrevivência do mais apto.
+             2   Recombinação: para modelar reprodução.
+             3   Mutação: para modelar a diversidade.
+
+
+
+78/108      Prof. Paulo Cirillo                                                                CCT, UNIFOR
+                                       Inteligência Artificial
+
+     Algoritmos Genéticos - Representação Cromossômica.
+         • O GA canônico proposto por Holland segue o mesmo princípio do algoritmo já exibido
+           anteriormente, contudo, com as seguintes características específicas:
+             • Uma representação cromossômica por sequência binária.
+             • Seleção proporcional é utilizada para selecionar indivíduos para recombinação.
+             • Recombinação de ponto único como principal método de reprodução.
+             • Mutação uniforme proposta como operador em "plano de fundo"de mínima importância.
+         • Vale ressaltar que a mutação originalmente não era um operador de importância em GA
+           canônico. A medida que as pesquisas se aprofundaram no tema, é que o poder explorativo da
+           mutação foi utilizado para melhorar as capacidades de busca de GAs.
+         • Além disso, como é de se esperar, após a proposta do modelo canônico, existem muitas variações
+           de GAs que se diferem em representação, operadores de seleção, operadores de recombinação,
+           operadores de mutação.
+
+
+
+79/108      Prof. Paulo Cirillo                                                                    CCT, UNIFOR
+                                          Inteligência Artificial
+
+
+     Algoritmos Genéticos - Operador de Recombinação.
+         • O operador de recombinação pode ser dividido em três categorias baseadas na quantidade de
+           parentes.
+             1   Assexuada: em que a prole é gerada a partir de um parente.
+             2   Sexuada: em que dois parentes são utilizados para produzir um ou dois filhos.
+             3   Múltipla: em que mais de dois pares são utilizados para produzir um ou mais filhos.
+         • Além disso, os operadores de recombinação podem ser baseados na forma (schema) de
+           representação cromossômica (operadores específicos para binários e operadores específicos para
+           números em ponto flutuante).
+         • A seleção de parentes é realizada utilizando qualquer um dos operadores já discutidos nos slides
+           anteriores.
+
+
+
+
+80/108      Prof. Paulo Cirillo                                                                        CCT, UNIFOR
+                                        Inteligência Artificial
+
+     Algoritmos Genéticos - Operador de Recombinação.
+         • A seleção de parentes é realizada utilizando qualquer um dos operadores já discutidos nos slides
+           anteriores (exemplo: método do torneio).
+         • Contudo, não há garantia de que os parentes selecionados, irão acasalar.
+         • A recombinação é aplicada probabilisticamente.
+         • Ou seja, cada par possui uma probabilidade de produzir filhos. Uma alta (0, 85 < pr s < 1)
+           probabilidade é utilizada para isso acontecer.
+         • Observações:
+             1 Como há uma probabilidade de seleção de parentes, pode ser o caso em que o casal selecionado para
+               reprodução seja composto de um mesmo indivíduo. Neste caso, a prole é uma cópia do parente.
+             2 É possível também que um indivíduo esteja presente em mais de uma operação de recombinação.
+         • Deve-se ainda levar em consideração que a recombinação tem uma política de substituição.
+
+
+
+81/108      Prof. Paulo Cirillo                                                                      CCT, UNIFOR
+                                                      Inteligência Artificial
+
+       Algoritmos Genéticos - Recombinação (Representação Binária).
+          • Em geral, as operações de recombinação em uma representação binária é sexuada.
+          • Considere x1 (t) e x2 (t) como dois indivíduos selecionados para acasalamento. A abordagem
+            genérica para produção da prole (x̃1 (t) e x̃2 (t)) é :
+       Algorithm 8: Recombinação Genérica por sequência binária.
+       1: Seja x̃1 (t) = x1 (t) e x̃2 (t) = x2 (t);
+       2: if U ∼ (0, 1) ≤ pr then
+       3:    Compute a máscara binária m(t);
+       4:    for j = 0, · · · , nd − 1 do
+       5:        if mj == 1 then
+       6:            Troque os bits:
+       7:            x̃1j (t) = x̃2j (t)
+       8:            x̃2j (t) = x̃1j (t)
+       9:        end if
+     10:     end for
+     11: end if
+     12: FIM.
+82/108        Prof. Paulo Cirillo                                                               CCT, UNIFOR
+                                          Inteligência Artificial
+
+     Algoritmos Genéticos - Recombinação (Representação Binária).
+         • Há diferentes maneiras de como computar a máscara de bits:
+             1   Recombinação de um ponto: proposto por Holland, faz com que se decida, de modo aleatório, um
+                 ponto de recombinação na sequência de bits. As sequências binárias após esse ponto são trocadas
+                 entre parentes.
+
+
+
+
+83/108      Prof. Paulo Cirillo                                                                        CCT, UNIFOR
+                                              Inteligência Artificial
+
+     Algoritmos Genéticos - Recombinação (Representação Binária).
+          • Há diferentes maneiras de como computar a máscara de bits:
+               1   Recombinação de um ponto: proposto por Holland, faz com que se decida, de modo aleatório, um
+                   ponto de recombinação na sequência de bits. As sequências binárias após esse ponto são trocadas
+                   entre parentes.
+     Algorithm 9: Geração da Máscara pela recombinação de um ponto.
+         1: Selecione o ponto de recombinação ξ ∼ U(1, nd − 1);
+         2: Inicialize a máscara com zeros: mj (t) = 0,        ∀ j = 0, · · · , nd − 1;
+         3: for j = ξ + 1 até nd do
+         4:   mj (t) = 1
+         5: end for
+         6: FIM.
+
+
+
+
+84/108        Prof. Paulo Cirillo                                                                        CCT, UNIFOR
+                                          Inteligência Artificial
+
+     Algoritmos Genéticos - Recombinação (Representação Binária).
+         • Há diferentes maneiras de como computar a máscara de bits:
+             1   Recombinação de dois pontos: Neste caso, duas posições são selecionadas de modo aleatório e as
+                 sequências binárias dos parentes são trocadas.
+
+
+
+
+85/108      Prof. Paulo Cirillo                                                                        CCT, UNIFOR
+                                               Inteligência Artificial
+
+     Algoritmos Genéticos - Recombinação (Representação Binária).
+          • Há diferentes maneiras de como computar a máscara de bits:
+               1   Recombinação de dois pontos: Neste caso, duas posições são selecionadas de modo aleatório e as
+                   sequências binárias dos parentes são trocadas.
+     Algorithm 10: Geração da Máscara pela recombinação de dois pontos.
+         1: Selecione os pontos de recombinação ξ1 , ξ2 , ∼ U(1, nd − 1);
+         2: Inicialize a máscara com zeros: mj (t) = 0,         ∀ j = 0, · · · , nd − 1;
+         3: for j = ξ1 + 1 até ξ2 do
+         4:   mj (t) = 1
+         5: end for
+         6: FIM.
+
+
+
+
+86/108        Prof. Paulo Cirillo                                                                        CCT, UNIFOR
+                                         Inteligência Artificial
+
+     Algoritmos Genéticos - Recombinação (Representação Binária).
+         • Há diferentes maneiras de como computar a máscara de bits:
+             1   Recombinação Uniforme: Neste caso, a máscara é gerada de maneira aleatória.
+
+
+
+
+87/108      Prof. Paulo Cirillo                                                                CCT, UNIFOR
+                                              Inteligência Artificial
+
+     Algoritmos Genéticos - Recombinação (Representação Binária).
+          • Há diferentes maneiras de como computar a máscara de bits:
+               1   Recombinação Uniforme: Neste caso, a máscara é gerada de maneira aleatória.
+               2   Além disso, px é a probabilidade de uma troca binária. Se px = 0, 5 então cada bit possui uma chance
+                   igual de ser alternado.
+     Algorithm 11: Geração da Máscara pela recombinação uniforme.
+         1: Inicialize a máscara com zeros: mj (t) = 0,        ∀ j = 1, · · · , nd ;
+         2: for j = 0 até nd − 1 do
+         3:   if U(0, 1) ≤ px then
+         4:      mj (t) = 1
+         5:   end if
+         6: end for
+         7: FIM.
+
+
+
+88/108        Prof. Paulo Cirillo                                                                           CCT, UNIFOR
+                                       Inteligência Artificial
+
+     Algoritmos Genéticos - Mutação.
+         • O objetivo da mutação é introduzir um novo material genético em um indivíduo existente.
+         • Ou seja, adicionar diversidade nas características genéticas da população.
+         • Mutação é utilizada como suporte ao operador de recombinação, de modo a garantir que a faixa
+           de alelos sejam acessíveis para cada gene.
+         • Assim como a recombinação, a mutação é aplicada com uma certa probabilidade pm (taxa de
+           mutação) em cada gene da prole.
+         • Assim, a prole, x̃i (t) após a aplicação do operador de mutação, é x′i (t).
+         • A taxa de mutação deve ser escolhida normalmente com valor pequeno (exemplo:1%). Isto, pois,
+           garante que as soluções boas não sejam tão distorcidas.
+         • Há ainda uma variação do GA que aplica a mutação com uma certa proporcionalidade inversa.
+           Ou seja, os indivíduos de baixa aptidão, possuem uma alta probabilidade de mutação.
+
+
+89/108      Prof. Paulo Cirillo                                                               CCT, UNIFOR
+                                          Inteligência Artificial
+
+     Algoritmos Genéticos - Mutação (Representação Binária).
+         • Para uma mutação em uma representação binária, podem-se destacar os métodos:
+             1   Mutação Uniforme: Em que as posições de bits (pontos de mutação) são escolhidas de modo
+                 aleatório e em seguida, o bit daquela posição é negado (ou do jargão da área, "togglado").
+
+
+
+
+90/108      Prof. Paulo Cirillo                                                                         CCT, UNIFOR
+                                            Inteligência Artificial
+
+     Algoritmos Genéticos - Mutação (Representação Binária).
+          • Para uma mutação em uma representação binária, podem-se destacar os métodos:
+               1   Mutação Uniforme: Em que as posições de bits (pontos de mutação) são escolhidas de modo
+                   aleatório e em seguida, o bit daquela posição é negado (ou do jargão da área, "togglado").
+     Algorithm 12: Mutação Uniforme.
+         1: for j = 1 até nd do
+         2:   if U(0, 1) ≤ pm then
+         3:      x′ij (t) = ¬x̃ij (t)
+         4:   end if
+         5: end for
+         6: FIM.
+
+          • Em que ¬ representa a negação do j−ésimo bit.
+
+
+
+91/108        Prof. Paulo Cirillo                                                                         CCT, UNIFOR
+                                          Inteligência Artificial
+
+     Algoritmos Genéticos - Mutação (Representação Binária).
+         • Para uma mutação em uma representação binária, podem-se destacar os métodos:
+             1   Mutação fora de ordem: Neste caso, posições na sequência binária são escolhidas de modo aleatório e
+                 os bits entre os pontos podem ser alternados como exibe o algoritmo:
+
+
+
+
+92/108      Prof. Paulo Cirillo                                                                         CCT, UNIFOR
+                                            Inteligência Artificial
+
+     Algoritmos Genéticos - Mutação (Representação Binária).
+          • Para uma mutação em uma representação binária, podem-se destacar os métodos:
+               1   Mutação fora de ordem: Neste caso, posições na sequência binária são escolhidas de modo aleatório e
+                   os bits entre os pontos podem ser alternados como exibe o algoritmo:
+     Algorithm 13: Mutação Fora de Ordem.
+         1: Selecione os pontos de mutação, ξ1 , ξ2 ∼ U(0, nd − 1)
+         2: for j = ξ1 até ξ2 do
+         3:   if U(0, 1) ≤ pm then
+         4:      x′ij (t) = ¬x̃ij (t)
+         5:   end if
+         6: end for
+         7: FIM.
+
+          • Em que ¬ representa a negação do j−ésimo bit.
+
+
+93/108        Prof. Paulo Cirillo                                                                         CCT, UNIFOR
+                                         Inteligência Artificial
+
+     GA - Estudo de caso 1.
+         • Para aplicar os conceitos abordados, solicita-se o uso de GA para a resolução do problema de
+           maximizar a função, em que seus parâmetros possuem restrição [−1, 15].
+                                                                       yπ 
+                                               f (x, y) = x · y · sen
+                                                                         4
+         • Desenvolva um raciocínio que envolve a definição das componentes de um GA.
+             1 Qual é a função aptidão?
+             2 Quantos bits são interessantes para representar a precisão das variáveis?
+             3 Qual valor da taxa de recombinação?
+             4 Qual valor da taxa de mutação?
+             5 Quantos indivíduos existirão na população?
+             6 Considere o uso do método da roleta para seleção de parentes.
+             7 Considere a recombinação de um único ponto de corte.
+             8 Considere a mutação uniforme.
+
+
+94/108      Prof. Paulo Cirillo                                                                 CCT, UNIFOR
+                                     Inteligência Artificial
+
+
+
+     Algoritmos Genéticos - Representação Cromossômica em ponto flutuante.
+         • Nesta representação, o i−ésimo cromossomo ou indivíduo da população é representado com um
+           vetor-linha de dimensão p, ou seja, x ∈ Rp :
+                                                                            
+                                            xi = xi1 xi2 · · · xij · · · xip
+
+         • Em que o elemento xij ∈ R representa o j−ésimo gene do i−ésimo cromossomo.
+
+
+
+
+95/108      Prof. Paulo Cirillo                                                           CCT, UNIFOR
+                                             Inteligência Artificial
+
+     Algoritmos Genéticos - Representação Cromossômica.
+         • Assim, uma população de N indivíduos na geração t é representada como uma matriz P(t) = X(t)
+           de dimensão N × p
+
+                                           x1 (t)
+                                                 
+                                          .. 
+                                          . 
+                                                 
+                                          xi (t)  =
+                                  X(t) =         
+                                          . 
+                                          .. 
+                                          xN (t)
+
+
+
+
+96/108      Prof. Paulo Cirillo                                                             CCT, UNIFOR
+                                              Inteligência Artificial
+
+     Algoritmos Genéticos - Representação Cromossômica.
+         • Assim, uma população de N indivíduos na geração t é representada como uma matriz P(t) = X(t)
+           de dimensão N × p
+
+                                           x1 (t)       x11 (t) x12 (t) · · · x1j (t) · · · x1p (t)
+                                                                                                 
+                                          ..   ..               ..         .. ..     ..     .. 
+                                          .   .                  .          .   .     .      . 
+                                                                                                 
+                                  X(t) =  xi (t)  =  xi1 (t) xi2 (t) · · · xij (t) · · · xip (t) 
+                                                    
+                                                                                                    
+                                          .   .                  ..         .. ..     ..     .. 
+                                          ..   ..                 .          ..        .      . 
+                                          xN (t)       xN1 (t) xN2 (t) · · · xNj (t) · · · xNp (t)
+
+         • Cada linha da matriz representa uma solução-candidata para o problema de interesse.
+         • A cada geração, N soluções candidatas são avaliadas pelo valor da função aptidão: fi (t) = f (xi (t)).
+
+
+96/108      Prof. Paulo Cirillo                                                                         CCT, UNIFOR
+                                           Inteligência Artificial
+
+
+     Algoritmos Genéticos - Recombinação (Representação Em Ponto Flutuante).
+         • Para modelos não canônicos, pode-se utilizar operadores de recombinação em representações em
+           ponto flutuante da sequência genética.
+         • Realizando um comparativo, nas operações de recombinação de uma sequência binária, são
+           trocados bits de informação entre parentes. Na representação em ponto flutuante no que lhe
+           concerne, os operadores são desenvolvidos para misturar as informações dos pais selecionados.
+         • Um dos primeiros métodos aplicados nesta representação, chama-se método de Wright:
+             • Este, faz uma operação linear entre dois parentes x1 (t) e x2 (t), gerando três filhos candidatos
+               (x1 (t) + x2 (t)), (1.5x1 (t) − 0.5x2 (t)) e (−0.5x1 (t) + 1.5x2 (t))
+             • As duas melhores soluções são selecionadas como prole.
+
+
+
+
+97/108      Prof. Paulo Cirillo                                                                              CCT, UNIFOR
+                                               Inteligência Artificial
+
+     Algoritmos Genéticos - Recombinação (Representação Em Ponto Flutuante).
+          • O método de Wright pode ser descrito:
+     Algorithm 14: Recombinação Genérica por sequência binária.
+         1: Seja x1 (t) e x2 (t) o par de cromossomo presente no grupo de selecionados;
+         2: if U ∼ (0, 1) ≤ pc then
+         3:   Indivíduo 1: x̃1 (t) ← x1 (t) + x2 (t)
+         4:   Indivíduo 2: x̃2 (t) ← 1.5x1 (t) − 0.5x2 (t)
+         5:   Indivíduo 3: x̃3 (t) ← −0.5x1 (t) + 1.5x2 (t)
+         6:   Retorne os dois indivíduos da prole com os maiores valores de aptidão.
+         7: end if
+         8: FIM.
+
+
+
+
+98/108        Prof. Paulo Cirillo                                                         CCT, UNIFOR
+                                           Inteligência Artificial
+
+     Algoritmos Genéticos - Recombinação (Representação Em Ponto Flutuante).
+         • Outro método amplamente utilizado, foi proposto por Deb e Agrawal, chamado de método de
+           Recombinação Binária Simulada (SBX, do inglês, Simulated Binary Crossover):
+             • Este, faz uma operação entre dois parentes x1 (t) e x2 (t) para gerar a prole:
+
+                                                 x̃1j = 0.5((1 + γj )x1j (t) + (1 − γj )x2j (t))
+
+                                                 x̃2j = 0.5((1 − γj )x1j (t) + (1 + γj )x2j (t))
+             • Para todos os j−ésimos termos. Ou seja, j = 1, · · · , p
+             • γ deve ser calculado, utilizando a seguinte regra:
+                                                                   1
+                                                          
+                                                          (2rj ) η+1           , rj ≤ 0.5
+                                                      γj =              1
+                                                                       η+1
+                                                                 1
+                                                          
+                                                                2(1−rj )        C.C
+
+         • Em que rj ∼ U(0, 1) e η > 0 é o índice de distribuição.
+
+99/108      Prof. Paulo Cirillo                                                                    CCT, UNIFOR
+                                          Inteligência Artificial
+
+
+
+     Algoritmos Genéticos - Recombinação (Representação Em Ponto Flutuante).
+          • O operador SBX tem as seguintes características:
+              1 Gera sua prole simetricamente em torno dos pais, prevenindo viés em torno de um dos pais.
+              2 Nesse sentido, viés significa um filho ser mais parecido com um dos pais.
+              3 η é um hiperparâmetro do algoritmo e deve ser definido > 0. Os autores do algoritmo, sugerem um
+                valor igual a 1.
+              4 Para grandes valores de η, há uma alta probabilidade de que a prole será criada próxima dos pais. Ou
+                seja, a prole será muito semelhante aos pais.
+              5 Para valores pequenos de η, a prole será mais distante dos pais, ou seja, menos semelhantes.
+
+
+
+
+100/108      Prof. Paulo Cirillo                                                                        CCT, UNIFOR
+                                            Inteligência Artificial
+
+     Algoritmos Genéticos - Recombinação (Representação Em Ponto Flutuante).
+          • O método SBX pode ser reescrito de modo vetorial, ao considerar:
+              • Este, faz uma operação entre dois parentes x1 (t) e x2 (t) para gerar a prole:
+
+                                                x̃1 = 0.5((1p + γ) ◦ x1 (t) + (1p − γ) ◦ x2 (t))
+
+                                                x̃2 = 0.5((1p − γ) ◦ x1 (t) + (1p + γ) ◦ x2 (t))
+              • Nesta, 1p é um vetor de 1s com dimensão p.
+              • γ é o vetor aleatório de dimensão p, cujas componentes são definidas pela equação:
+                                                                    1
+                                                           
+                                                           (2rj ) η+1         , rj ≤ 0.5
+                                                       γj =              1
+                                                                        η+1
+                                                                  1
+                                                           
+                                                                2(1−rj )       C.C
+
+          • Em que rj ∼ U(0, 1) e η > 0 é o índice de distribuição.
+
+
+101/108      Prof. Paulo Cirillo                                                                     CCT, UNIFOR
+                                       Inteligência Artificial
+
+
+     Algoritmos Genéticos - Recombinação (Representação Em Ponto Flutuante).
+          • A operação de recombinação tem como objetivo de conferir certa variabilidade genética em
+            função da troca de material genético entre indivíduos.
+          • Simultaneamente, pode-se dizer que mantém uma espécie de memória genética da população.
+          • A intensidade da troca genética, é conduzida pela probabilidade de recombinação.
+          • Se pc é muito baixa, então haverá menor troca de informação genética devido à recombinação.
+            Assim, a cada geração, haverá maior inércia (lentidão) com relação a mudanças genéticas na
+            população.
+          • Por esse motivo pc deve possui um valor alto como já mencionado.
+
+
+
+
+102/108      Prof. Paulo Cirillo                                                                CCT, UNIFOR
+                                             Inteligência Artificial
+
+     Algoritmos Genéticos - Mutação (Representação em ponto flutuante).
+          • O método de mutação gaussiana discutido anteriormente, possui uma melhor desempenho
+            quando aplicado já em uma representação em ponto flutuante, de acordo com resultados obtidos
+            por Hinterding e Michalewicz.
+          • Assim, a mutação normal pode ser aplicada da seguinte maneira (de modo vetorial):
+     Algorithm 15: Mutação Gaussiana.
+
+      1: Seja X̃(t) a prole gerada na t−ésima geração.
+      2: for i = 1 até np do
+      3:   if U(0, 1) ≤ pm then
+      4:      x′i (t) = x̃i (t) + η(xu − xl ) ◦ n
+      5:   end if
+      6: end for
+      7: FIM.
+
+
+103/108      Prof. Paulo Cirillo                                                              CCT, UNIFOR
+                                        Inteligência Artificial
+
+
+
+     Algoritmos Genéticos - Mutação (Representação em ponto flutuante).
+          • No algoritmo anterior, pm é a probabilidade de mutação.
+          • η representa o passo de mutação e deve ser definido entre 0 < η ≪ 1.
+          • ◦ representa o operador de produto de Hadamard (ou seja, element-wise product).
+          • n é um vetor aleatório p−dimensional amostrado de uma densidade de probabilidade gaussiana
+            multivariada de vetor médio nulo e matriz de covariância identidade, ou seja, n ∼ N (0, Ip )
+
+
+
+
+104/108      Prof. Paulo Cirillo                                                              CCT, UNIFOR
+                                        Inteligência Artificial
+
+
+     Algoritmos Genéticos - Mutação Recapitulando.
+          • O operador de mutação tem como objetivo, conferir certa inovação genética aos indivíduos da
+            prole.
+          • A intensidade da inovação é controlada pela probabilidade de mutação pm .
+          • Se pm é muito alta, haverá excesso de inovação, o que pode destruir a história (memória) genética
+            da população.
+          • Neste caso, o GA se assemelha a uma busca global com N soluções independentes por geração.
+          • Desta maneira, pm deve ser mantida em um valor baixo (por exemplo, pm < 5%).
+
+
+
+
+105/108      Prof. Paulo Cirillo                                                                  CCT, UNIFOR
+                                        Inteligência Artificial
+
+     Algoritmos Genéticos - Mutação (Representação Binária).
+          • Uma outra abordagem, que é amplamente utilizada para representações binárias, bem como para
+            representação em ponto flutuante, é chamada de Mutação Gaussiana.
+          • Para o caso binário, deve-se decodificar a sequência de volta a sua representação em ponto
+            flutuante e assim aplicar a mutação baseada numa perturbação normal (gaussiana).
+          • Esse procedimento já foi aplicado anteriormente?
+          • Em seguida, o valor obtido é codificado novamente para sua versão binária.
+          • Deve-se considerar, nesse caso, que há a possibilidade de estouro da restrição de domínio
+            imposta às variáveis.
+          • Outra discussão importante, é que os algoritmos exibidos anteriormente (com representação
+            binária), podem acarretar um alto custo computacional se a sequência de bits for muito grande.
+            Uma maneira de contornar esse problema é dividir a sequência em segmentos e assim selecionar
+            de modo aleatório os segmentos que terão a mutação. Nestes, apenas um bit é selecionado de
+            modo aleatório para ser alternado.
+106/108      Prof. Paulo Cirillo                                                                CCT, UNIFOR
+                                            Inteligência Artificial
+
+     Algoritmos Genéticos - Exemplo 1.
+          • Considere como exemplo inicial, a seguinte problemática:
+              1   Encontrar o máximo da função:
+                                                         f (x) = x · sin(10πx) + 1, 0
+              2   Que possui restrição no domínio de x em: −1, 0 ≤ x ≤ 2, 0.
+              3   Para solucionar este problema, considere que serão utilizados no algoritmo genético:
+                     I Uma representação cromossômica binária com 20 bits.
+                    II Uma população inicial com N = 20 indivíduos.
+                   III A função aptidão é a própria função objetivo.
+                  IV Utilizar o método de seleção do método do torneio (em pares).
+                    V Para recombinação, utilizar o operador de um ponto e com probabilidade de 75%.
+                  VI A mutação, é aplicada na prole com uma probabilidade de 1%.
+                  VII Como critério de parada, defina um número máximo de gerações em 30.
+
+
+
+
+107/108      Prof. Paulo Cirillo                                                                         CCT, UNIFOR
+                                             Inteligência Artificial
+
+     Algoritmos Genéticos - Exemplo 2.
+          • Considere como exemplo inicial, a seguinte problemática:
+              1   Encontrar o mínimo da função:
+
+                                                   f (x) = −20e−0.2|x| − ecos (2πx) + 20 + e
+
+              2   Que possui restrição no domínio de x em: −5, 0 ≤ x ≤ 5, 0.
+              3   Para solucionar este problema, considere que serão utilizados no algoritmo genético:
+                     I Uma representação cromossômica em ponto flutuante. Para este caso, qual valor de p?
+                    II Uma população inicial com N = 30 indivíduos.
+                   III A função aptidão é a própria função objetivo.
+                  IV Realizar uma análise comparativa entre método do torneio (em pares) e método da roleta.
+                    V Para recombinação, utilizar o operador de Recombinação Binária Simulada de um ponto e com
+                       probabilidade de 85%.
+                  VI A mutação, é aplicada na prole com uma probabilidade de 1%. Neste caso, utilize a perturbação η = 0.01 e
+                       n ∼ N (0, Ip )
+                  VII Como critério de parada, defina um número máximo de gerações em 30x’ .
+
+
+108/108      Prof. Paulo Cirillo                                                                                 CCT, UNIFOR
+

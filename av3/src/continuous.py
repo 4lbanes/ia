@@ -66,11 +66,13 @@ def _random_bounds(bounds: Sequence[Tuple[float, float]], rng: np.random.Generat
     return rng.uniform(lows, highs)
 
 
-def _hits_optimum(value: float, problem: Problem) -> bool:
-    if problem.known_optimum is None:
+def _hits_optimum(value: float, problem: Problem, target: float | None = None, tolerance: float | None = None) -> bool:
+    if target is None:
+        target = problem.known_optimum
+    if target is None:
         return False
-    tolerance = 10 ** (-problem.rounding)
-    return abs(value - problem.known_optimum) <= tolerance
+    tol = tolerance if tolerance is not None else 10 ** (-problem.rounding)
+    return abs(value - target) <= tol
 
 
 class HillClimbing:
@@ -134,28 +136,31 @@ class LocalRandomSearch:
 
 
 class GlobalRandomSearch:
-    def __init__(self, sigma: float = 0.4, max_iter: int = 1000):
+    def __init__(self, sigma: float = 0.4, max_iter: int = 1000, patience: int = 60):
         self.sigma = sigma
         self.max_iter = max_iter
+        self.patience = patience
 
     def run(self, problem: Problem, rng: np.random.Generator) -> RunResult:
         best = _random_bounds(problem.bounds, rng)
         best_val = problem.evaluate(best)
-        ranges = np.array([hi - lo for lo, hi in problem.bounds], dtype=float)
+        no_improve = 0
+        # σ controla a quantidade de candidatos uniformes por iteração (quanto menor, mais amostras).
+        samples_per_iter = max(1, min(64, int(np.ceil(1.0 / max(self.sigma, 1e-9)))))
         for step in range(1, self.max_iter + 1):
-            candidates = []
-            # Metade das amostras puramente aleatórias, metade explorando ao redor do melhor.
-            for _ in range(4):
-                candidates.append(_random_bounds(problem.bounds, rng))
-            scale = self.sigma * (0.995 ** step)
-            for _ in range(4):
-                candidates.append(best + rng.normal(0, scale * ranges))
-            vals = [problem.evaluate(c) for c in candidates]
-            idx = int(np.argmin(vals) if problem.goal == "min" else np.argmax(vals))
-            cand_val = float(vals[idx])
-            candidate = candidates[idx]
-            if problem.is_better(cand_val, best_val):
-                best, best_val = candidate, cand_val
+            improved = False
+            for _ in range(samples_per_iter):
+                candidate = _random_bounds(problem.bounds, rng)
+                cand_val = problem.evaluate(candidate)
+                if problem.is_better(cand_val, best_val):
+                    best, best_val = candidate, cand_val
+                    improved = True
+            if improved:
+                no_improve = 0
+            else:
+                no_improve += 1
+            if no_improve >= self.patience:
+                return RunResult(best, best_val, step)
         return RunResult(best, best_val, self.max_iter)
 
 
@@ -166,7 +171,27 @@ def _ackley(x: Array) -> float:
     return -20 * np.exp(term1) - np.exp(term2) + 20 + np.e
 
 
+def _approximate_known_optimum(
+    func: Callable[[Array], float], bounds: Sequence[Tuple[float, float]], goal: str, samples: int = 200_000
+) -> float:
+    rng = np.random.default_rng(12345)
+    lows = np.array([b[0] for b in bounds], dtype=float)
+    highs = np.array([b[1] for b in bounds], dtype=float)
+    points = rng.uniform(lows, highs, size=(samples, len(bounds)))
+    vals = np.apply_along_axis(func, 1, points)
+    return float(np.min(vals) if goal == "min" else np.max(vals))
+
+
 def build_problems() -> List[Problem]:
+    composed_func = lambda x: (x[0] ** 2 * np.cos(x[0]) / 20.0) + 2 * np.exp(-(x[0] ** 2) - (x[1] - 1) ** 2) + 0.01 * x[0] * x[1]
+    asym_sin_func = lambda x: x[0] * np.sin(4 * np.pi * x[0]) - x[1] * np.sin(4 * np.pi * x[1] + np.pi) + 1
+
+    composed_bounds = [(-10.0, 10.0), (-10.0, 10.0)]
+    asym_bounds = [(-1.0, 3.0), (-1.0, 3.0)]
+
+    composed_opt = _approximate_known_optimum(composed_func, composed_bounds, goal="max")
+    asym_opt = _approximate_known_optimum(asym_sin_func, asym_bounds, goal="max")
+
     return [
         Problem(
             name="Quadrática simples",
@@ -204,18 +229,18 @@ def build_problems() -> List[Problem]:
         ),
         Problem(
             name="Função composta",
-            func=lambda x: (x[0] ** 2 * np.cos(x[0]) / 20.0)
-            + 2 * np.exp(-(x[0] ** 2) - (x[1] - 1) ** 2)
-            + 0.01 * x[0] * x[1],
-            bounds=[(-10.0, 10.0), (-10.0, 10.0)],
+            func=composed_func,
+            bounds=composed_bounds,
             goal="max",
+            known_optimum=composed_opt,
             rounding=3,
         ),
         Problem(
             name="Função senoidal assimétrica",
-            func=lambda x: x[0] * np.sin(4 * np.pi * x[0]) - x[1] * np.sin(4 * np.pi * x[1] + np.pi) + 1,
-            bounds=[(-1.0, 3.0), (-1.0, 3.0)],
+            func=asym_sin_func,
+            bounds=asym_bounds,
             goal="max",
+            known_optimum=asym_opt,
             rounding=3,
         ),
     ]
@@ -230,6 +255,10 @@ def _select_hyperparameter(
 ) -> float:
     results: Dict[float, float] = {}
     hits: Dict[float, int] = {}
+    target_value = problem.known_optimum
+    if target_value is None:
+        target_value = problem.estimate_optimum(rng)
+    tolerance = 10 ** (-problem.rounding) if problem.known_optimum is not None else 1e-3 + 0.01 * abs(target_value)
     seed_pool = rng.integers(0, 2**32 - 1, size=warmup_runs)
     for val in values:
         bests = []
@@ -238,13 +267,12 @@ def _select_hyperparameter(
             res = opt.run(problem, np.random.default_rng(seed))
             bests.append(res.best_value)
         results[val] = float(np.median(bests))
-        hits[val] = sum(1 for b in bests if _hits_optimum(b, problem))
+        hits[val] = sum(1 for b in bests if _hits_optimum(b, problem, target=target_value, tolerance=tolerance))
     # Prefer o menor hiperparâmetro que atinge o ótimo conhecido
     feasible = [v for v, c in hits.items() if c > 0]
     if feasible:
         return float(min(feasible))
-    target = max(results.values()) if problem.goal == "max" else min(results.values())
-    tolerance = 1e-3 + 0.01 * abs(target)
+    target = target_value
     feasible = [v for v, res in results.items() if abs(res - target) <= tolerance]
     if feasible:
         return min(feasible)
@@ -281,14 +309,14 @@ def run_continuous_experiments(
         grs_sigma = _select_hyperparameter(
             problem,
             values=[0.8, 0.5, 0.2, 0.1, 0.05, 0.02, 0.01, 0.005, 0.001],
-            builder=lambda sigma: GlobalRandomSearch(sigma, max_iter=max_iter),
+            builder=lambda sigma: GlobalRandomSearch(sigma, max_iter=max_iter, patience=patience),
             rng=prob_rng,
         )
 
         algo_configs = {
             "hill_climbing": HillClimbing(hc_eps, max_iter=max_iter, patience=patience),
             "local_random_search": LocalRandomSearch(lrs_sigma, max_iter=max_iter, patience=patience),
-            "global_random_search": GlobalRandomSearch(grs_sigma, max_iter=max_iter),
+            "global_random_search": GlobalRandomSearch(grs_sigma, max_iter=max_iter, patience=patience),
         }
 
         for name, optimizer in algo_configs.items():

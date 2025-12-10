@@ -30,24 +30,7 @@ class GAConfig:
     crossover_rate: float = 0.9
     mutation_rate: float = 0.01
     elitism: int = 2
-    acceptable_epsilon: float = 0.05  # tolerância relativa (ε) para definir solução aceitável
-
-
-def generate_points(points_per_region: int, rng: np.random.Generator) -> PointCloud:
-    centers = np.array(
-        [
-            [0.0, 0.0, 0.0],
-            [25.0, 0.0, 15.0],
-            [0.0, 25.0, 30.0],
-            [20.0, 20.0, 5.0],
-        ]
-    )
-    cloud = []
-    for center in centers:
-        cloud.append(
-            center + rng.normal(0, 4.0, size=(points_per_region, 3))
-        )
-    return np.vstack(cloud)
+    acceptable_epsilon: float = 0.05  # tolerância relativa (ε) usada no critério de parada aceitável
 
 
 def _load_csv_points(csv_path: Path, points_per_region: int) -> PointCloud | None:
@@ -83,7 +66,8 @@ def load_points(path: str | Path | None, points_per_region: int, rng: np.random.
         data = _load_csv_points(csv_path, points_per_region)
         if data is not None:
             return data
-    return generate_points(points_per_region, rng)
+
+    raise FileNotFoundError("Arquivo de pontos obrigatório não encontrado (esperado CaixeiroGrupos*.csv).")
 
 
 def route_length(route: Sequence[int], points: PointCloud) -> float:
@@ -93,6 +77,17 @@ def route_length(route: Sequence[int], points: PointCloud) -> float:
         total += float(np.linalg.norm(points[b] - points[a]))
     total += float(np.linalg.norm(points[route[-1]] - origin))
     return total
+
+
+def estimate_target_length(points: PointCloud, rng: np.random.Generator, samples: int = 512) -> float:
+    num_points = len(points)
+    best = float("inf")
+    for _ in range(samples):
+        route = list(rng.permutation(num_points))
+        length = route_length(route, points)
+        if length < best:
+            best = length
+    return best
 
 
 def tournament(population: List[Route], lengths: List[float], size: int, rng: np.random.Generator) -> Route:
@@ -133,18 +128,23 @@ def run_ga(
     best_idx = int(np.argmin(lengths))
     best_length = lengths[best_idx]
     best_route = population[best_idx].copy()
-    initial_best = best_length
-    # Regra de solução aceitável conforme slide: se |f(x*) - ε| foi atingido.
-    # Se o ótimo (target_length) é desconhecido, usamos o melhor inicial como referência
-    # e exigimos uma melhoria relativa de (1 - ε) (minimização).
     if target_length is None:
-        target_length = initial_best
-        acceptable_threshold = target_length * (1.0 - config.acceptable_epsilon)
-    else:
-        acceptable_threshold = target_length * (1.0 + config.acceptable_epsilon)
+        target_length = estimate_target_length(points, rng)
+    epsilon_abs = abs(target_length) * config.acceptable_epsilon
+    acceptable_threshold = target_length + epsilon_abs  # |f(x*) - ε| para minimização
 
     acceptable_generation = 0 if best_length <= acceptable_threshold else None
     history: List[float] = [best_length]
+
+    if acceptable_generation is not None:
+        return {
+            "best_route": [int(g) for g in best_route],
+            "best_length": float(best_length),
+            "history": [float(v) for v in history],
+            "acceptable_generation": int(acceptable_generation),
+            "target_length": float(target_length),
+            "acceptable_threshold": float(acceptable_threshold),
+        }
 
     for gen in range(1, config.generations + 1):
         ranked = sorted(zip(population, lengths), key=lambda t: t[1])
@@ -189,20 +189,19 @@ def multiple_runs(
     target_length: float | None = None,
 ) -> Dict[str, object]:
     rng = np.random.default_rng(seed)
+    reference_target = target_length if target_length is not None else estimate_target_length(points, rng)
+    acceptable_threshold = reference_target + abs(reference_target) * config.acceptable_epsilon
     best_overall = None
     best_route: Route | None = None
     generations: List[int] = []
     histories: List[List[float]] = []
-    best_threshold: float | None = None
-    reference_length: float | None = None
 
     for _ in range(runs):
-        run_target = target_length  # Mantém valor fornecido pelo usuário; não propaga entre execuções.
         res = run_ga(
             points,
             config,
             seed=int(rng.integers(0, 2**32 - 1)),
-            target_length=run_target,
+            target_length=reference_target,
         )
         histories.append(res["history"])  # type: ignore[index]
         if res["acceptable_generation"] is not None:
@@ -210,8 +209,6 @@ def multiple_runs(
         if best_overall is None or res["best_length"] < best_overall:
             best_overall = float(res["best_length"])
             best_route = list(res["best_route"])  # type: ignore[list-item]
-            best_threshold = res["acceptable_threshold"]  # type: ignore[assignment]
-            reference_length = res["target_length"]  # type: ignore[assignment]
 
     mode_gen, freq = (None, 0)
     if generations:
@@ -225,8 +222,8 @@ def multiple_runs(
         "mode_frequency": freq,
         "generations_hit": generations,
         "histories": histories,
-        "target_length": reference_length if reference_length is not None else target_length,
-        "acceptable_threshold": best_threshold,
+        "target_length": float(reference_target),
+        "acceptable_threshold": float(acceptable_threshold),
         "runs": runs,
     }
 

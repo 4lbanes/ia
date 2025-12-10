@@ -81,27 +81,31 @@ class SimulatedAnnealing:
 def find_all_solutions(
     solver: SimulatedAnnealing,
     seed: int | None = None,
-    max_runs: int = 2000,
+    max_runs: int | None = None,
     target_count: int = 92,
 ) -> Dict[str, object]:
     rng = np.random.default_rng(seed)
     solutions: Dict[Tuple[int, ...], int] = {}
     total_iterations = 0
-    for run in range(max_runs):
+    runs_done = 0
+    while True:
         res = solver.run(seed=int(rng.integers(0, 2**32 - 1)))
         total_iterations += res.iterations
+        runs_done += 1
         if res.score >= MAX_PAIRS:
             key = tuple(res.board)
             solutions.setdefault(key, 0)
             solutions[key] += 1
         if len(solutions) >= target_count:
             break
+        if max_runs is not None and runs_done >= max_runs:
+            break
     return {
         "found": len(solutions),
         "solutions": [list(sol) for sol in solutions],
         "visits_per_solution": {",".join(map(str, sol)): count for sol, count in solutions.items()},
-        "runs_performed": run + 1,
-        "avg_iterations": total_iterations / max(1, run + 1),
+        "runs_performed": runs_done,
+        "avg_iterations": total_iterations / max(1, runs_done),
     }
 
 
@@ -112,7 +116,7 @@ def solve_and_save(
     cooling: float = 0.997,
     max_iter: int = 20000,
     find_all: bool = True,
-    find_all_max_runs: int = 2000,
+    find_all_max_runs: int | None = None,
 ) -> Dict[str, object]:
     Path(output_dir).mkdir(parents=True, exist_ok=True)
     solver = SimulatedAnnealing(temp0=temp0, cooling=cooling, max_iter=max_iter)

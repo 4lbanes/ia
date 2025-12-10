@@ -71,7 +71,7 @@ def main() -> None:
             cooling=0.995,
             max_iter=5000,
             find_all=True,
-            find_all_max_runs=2000,
+            find_all_max_runs=None,
         )
         print("Resultados da Têmpera Simulada salvos em", output_root / "simulated_annealing.json")
         print(_safe_json(sa_results))
