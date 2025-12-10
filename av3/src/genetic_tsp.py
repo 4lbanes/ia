@@ -157,7 +157,6 @@ def run_ga(
         history.append(best_length)
         if acceptable_generation is None and best_length <= acceptable_threshold:
             acceptable_generation = int(gen)
-        if acceptable_generation is not None and gen > acceptable_generation + 50:
             break
 
     return {
@@ -182,6 +181,7 @@ def multiple_runs(
     best_route: Route | None = None
     generations: List[int] = []
     histories: List[List[float]] = []
+    best_threshold: float | None = None
 
     for _ in range(runs):
         res = run_ga(
@@ -197,6 +197,7 @@ def multiple_runs(
             best_overall = float(res["best_length"])
             best_route = list(res["best_route"])  # type: ignore[list-item]
             target_length = res["target_length"]  # type: ignore[assignment]
+            best_threshold = res["acceptable_threshold"]  # type: ignore[assignment]
 
     mode_gen, freq = (None, 0)
     if generations:
@@ -211,6 +212,8 @@ def multiple_runs(
         "generations_hit": generations,
         "histories": histories,
         "target_length": target_length,
+        "acceptable_threshold": best_threshold,
+        "runs": runs,
     }
 
 
@@ -218,16 +221,26 @@ def solve_and_save(
     csv_path: str | Path | None = DEFAULT_CSV_PATH,
     output_dir: str | Path = "av3/resultados",
     seed: int | None = None,
-    points_per_region: int = 40,
+    points_per_region: int = 34,
     acceptable_epsilon: float = 0.05,
     target_length: float | None = None,
+    runs: int = 10,
 ) -> Dict[str, object]:
     Path(output_dir).mkdir(parents=True, exist_ok=True)
     rng = np.random.default_rng(seed)
     points = load_points(csv_path, points_per_region, rng)
     config = GAConfig(acceptable_epsilon=acceptable_epsilon)
-    summary = multiple_runs(points, config=config, runs=8, seed=seed, target_length=target_length)
-    payload = {"config": config.__dict__, "points": points.tolist(), "summary": summary}
+    summary = multiple_runs(points, config=config, runs=runs, seed=seed, target_length=target_length)
+    payload = {
+        "config": {
+            **config.__dict__,
+            "runs": runs,
+            "points_per_region": points_per_region,
+            "num_points": len(points),
+        },
+        "points": points.tolist(),
+        "summary": summary,
+    }
     out_path = Path(output_dir) / "genetic_tsp.json"
     with out_path.open("w", encoding="utf-8") as f:
         json.dump(payload, f, indent=2, ensure_ascii=False, default=_to_serializable)

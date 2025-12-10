@@ -66,6 +66,13 @@ def _random_bounds(bounds: Sequence[Tuple[float, float]], rng: np.random.Generat
     return rng.uniform(lows, highs)
 
 
+def _hits_optimum(value: float, problem: Problem) -> bool:
+    if problem.known_optimum is None:
+        return False
+    tolerance = 10 ** (-problem.rounding)
+    return abs(value - problem.known_optimum) <= tolerance
+
+
 class HillClimbing:
     def __init__(self, epsilon: float = 0.1, max_iter: int = 1000, patience: int = 60):
         self.epsilon = epsilon
@@ -203,6 +210,7 @@ def _select_hyperparameter(
     warmup_runs: int = 6,
 ) -> float:
     results: Dict[float, float] = {}
+    hits: Dict[float, int] = {}
     seed_pool = rng.integers(0, 2**32 - 1, size=warmup_runs)
     for val in values:
         bests = []
@@ -211,6 +219,11 @@ def _select_hyperparameter(
             res = opt.run(problem, np.random.default_rng(seed))
             bests.append(res.best_value)
         results[val] = float(np.median(bests))
+        hits[val] = sum(1 for b in bests if _hits_optimum(b, problem))
+    # Prefer o menor hiperparâmetro que atinge o ótimo conhecido
+    feasible = [v for v, c in hits.items() if c > 0]
+    if feasible:
+        return float(min(feasible))
     target = max(results.values()) if problem.goal == "max" else min(results.values())
     tolerance = 1e-3 + 0.01 * abs(target)
     feasible = [v for v, res in results.items() if abs(res - target) <= tolerance]
@@ -269,6 +282,7 @@ def run_continuous_experiments(
                 best_points.append(res.best_x.tolist())
 
             mode_val, freq = _mode(best_values, problem.rounding)
+            success_count = sum(1 for v in best_values if _hits_optimum(v, problem))
             summaries[name] = {
                 "hyperparameter": getattr(optimizer, "epsilon", None) or getattr(optimizer, "sigma", None),
                 "mode": mode_val,
@@ -278,6 +292,14 @@ def run_continuous_experiments(
                 "std_value": float(np.std(best_values)),
                 "all_best_values": best_values,
                 "best_points": best_points,
+                "runs": runs,
+                "max_iter": max_iter,
+                "patience": patience,
+                "goal": problem.goal,
+                "known_optimum": problem.known_optimum,
+                "success_tolerance": 10 ** (-problem.rounding),
+                "success_count": success_count,
+                "success_rate": success_count / runs,
             }
 
         results[problem.name] = summaries
